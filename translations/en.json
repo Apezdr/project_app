@@ -1,99 +1,16 @@
 {
   "app": {
-    "name": "Project Management",
-    "description": "Create Children tickets that all link back to a parent ticket.",
-    "parameters" : {
-      "Custom_Field_ID" : {
-        "label": "Custom Field ID",
-        "helpText": "You can find the Custom Field ID on the ticket field edit page"
-      },
-      "prependSubject": {
-        "label": "Prepend Subject Line",
-        "helpText": "Prepend the subject line of the children tickets with the project ID"
-      },
-      "appendSubject": {
-        "label": "Append Subject Line",
-        "helpText": "Append the the subject line of the children tickets with the project ID"
-      },
-      "settingsMap" : {
-        "label": "Preset template mappings",
-        "helpText": "Settings for ticket types to set groups for bulk ticket creates. It needs to be in a JSON format"
-      },
-      "prefillAssignee" : {
-        "label": "Prefill assignee and group",
-        "helpText": "Prefill the assignee and group fields in the creation form, taken over from the current ticket."
-      },
-      "defaultTicketType" : {
-        "label": "Default ticket type",
-        "helpText": "Instead of taking over the ticket type from the current ticket, use this type by default. Empty (to take over), or one of: question, incident, problem, or task."
-      },
-      "defaultTicketPriority" : {
-        "label": "Default ticket priority",
-        "helpText": "Instead of taking over the ticket priority from the current ticket, use this priority by default. Empty (to take over), or one of: low, normal, high, urgent."
-      },
-      "customFieldIdsToCopy" : {
-        "label": "Copy values from Custom Fields",
-        "helpText": "(Optionally) copy the values from the Custom Fields with these ID(s) to the new ticket(s). Comma separated."
-      }
-    }
+    "description": "Play the famous zen tunes in your help desk.",
+    "name": "Buddha Machine"
   },
-  "title":"Project App",
-  "user": {
-    "btnCurrComm": "Make a Project from this ticket",
-    "btnMakeSingle":"Create Single",
-    "btnProList": "Project List",
-    "btnMakeBulk": "Create Bulk",
-    "btnAddExist": "Add existing",
-    "btnRemoveFrom": "Remove ticket from project"
+  "loading": "Welcome to this Sample App",
+  "fetch": {
+    "done": "Good",
+    "fail": "failed to fetch information from the server"
   },
-  "form":{
-    "tableParent":"Parent",
-    "tableChildren": "Children",
-    "tablePri": "Priority",
-    "tableGroup":"Group",
-    "tableType":"Type",
-    "tableAssign": "Assignee",
-    "ticket":"Ticket",
-    "wasCreated":"was created with",
-    "addTicketno":"Enter a list of ticket id's separated with commas",
-    "listOfTicket": "List of ticket ID's",
-    "addTicket":"Add Tickets to Project",
-    "ticketId":"Ticket ID's",
-    "ticketForm": "Ticket Form",
-    "requester": "Requester",
-    "requesterName": "Requester Name",
-    "assignName": "Assignee Name",
-    "group": "Group",
-    "groups": "Groups",
-    "ticketType": "Ticket Type",
-    "dueDate":"Due Date",
-    "tickPri": "Ticket Priority",
-    "subject":"Subject",
-    "subjPlace":"Enter Subject",
-    "description":"Description",
-    "descPlace": "Please Describe the issue",
-    "btnCreateSigle": "Create Single Ticket",
-    "btnCreateBulk":"Create Bulk Tickets"
-    },
-  "none": "Not currently in a Project",
-  "status":{
-    "new": "New",
-    "open": "Open",
-    "pending": "Pending",
-    "hold": "On Hold",
-    "solved": "Solved",
-    "closed": "Closed"
-  },
-  "priority":{
-    "low": "Low",
-    "normal": "Normal",
-    "high": "High",
-    "urgent": "Urgent"
-  },
-  "type":{
-    "question":"Question",
-    "incident":"Incident",
-    "problem":"Problem",
-    "task":"Task"
-  }
+  "id": "ID",
+  "email": "Email",
+  "name": "Name",
+  "role": "Role",
+  "groups": "Groups"
 }
