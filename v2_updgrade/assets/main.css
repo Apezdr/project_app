@@ -1,0 +1,80 @@
+#zendeskGSelect{
+  height: 150px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 5px 10px 5px;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 18px;
+    color: #555;
+    text-align: center;
+    text-shadow: none !important;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #ffffff;
+    background-image: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: none;
+    white-space: nowrap;
+}
+
+textarea:required:invalid, textarea:focus:invalid, input:required:invalid, input:focus:invalid {
+  /* insert your own styles for invalid form input */
+  box-shadow: inset 0 0 2px 0 red;
+}
+
+textarea:required:valid, input:required:valid, input:focus:valid {
+  /* insert your own styles for valid form input */
+  box-shadow: inset 0 0 2px 0 green;
+}
+
+.control-group {
+  margin-bottom: 15px;
+}
+
+li {
+  list-style-type: none;
+}
+
+p.parent {
+  box-shadow: inset 0 0 5px 0 green;
+}
+
+.ui-autocomplete {
+  max-height: 100px;
+  overflow-y: auto;
+  /* prevent horizontal scrollbar */
+  overflow-x: hidden;
+}
+
+.displayList, .displayForm, .displayMultiCreate, .displayUpdate, .removeTicket {
+  display: none;
+}
+
+.centered {
+  text-align: center;
+}
+
+.navigation-buttons {
+  margin-bottom: 20px;
+}
+
+select {
+  display: block;
+  border: 1px solid #CCC;
+}
+
+.ticket_status_label {
+  text-transform: uppercase;
+}
+
+.ticket_status {
+  text-align: right;
+} 
+
+label {
+    font-weight: normal !important;
+}

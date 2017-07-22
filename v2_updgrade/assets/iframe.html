@@ -1,0 +1,145 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://assets.zendesk.com/apps/sdk-assets/css/0/zendesk_garden.css" type="text/css">
+  <link rel="stylesheet" href="styles/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="main.css" type="text/css">
+</head>
+<body>
+
+  <div id="app">
+   
+    <div id="content">
+        <div class="centered">
+          <button class="btn" id="listProjects" v-on:click="listProjects">Make a Project from this Ticket</button>
+        </div> 
+    </div>
+
+    <script id="project-lists" type="text/x-handlebars-template">
+      <div id="navigation-buttons" class="centered">
+          <div class="navigation-buttons centered">
+            <button class='displayList ember-view btn'>Project List</button>
+            <button class='parent displayForm ember-view btn' v-on:click="switchToRequester">Create Single</button>
+            <button class='parent displayMultiCreate ember-view btn'>Create Bulk</button>
+            <button class='parent displayUpdate ember-view btn'>Add Existing</button>
+            <button class='child removeTicket ember-view btn'>Remove Ticket from Project</button>
+          </div>
+       </div>
+   
+
+      {{#if projects.length}}
+        <div>
+          {{#each projects}}
+            {{#selected}}
+             
+            {{/selected}}
+          {{/each}}
+
+          <h5></h5>
+          {{#each projects}}
+           
+          {{/each}}
+        </div>
+      {{else}}
+        <p>Not currently in a Project</p>
+      {{/if}}
+
+    </script>
+
+    <script id="create-single-ticket" type="text/x-handlebars-template">
+    
+    <div class="">
+      <div class="well">
+        <div class="form-group">
+          <label for="zendeskForm">Ticket Form</label>
+          <select id="zendeskForm" required name="zendeskForm>
+            <option value="">-</option>
+            {{#each ticketForm}}
+              <option value="{{@key}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="userEmail">Requester</label> <br>
+          <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" style="width: 196px" value="{{email}}"/>
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label for="userName">Requester Name</label> <br>
+          <input type="text" required placeholder="Requester Name" name="userName" id="userName" style="width: 196px;" value=""/>
+        </div>
+
+        <div class="form-group">
+          <label for="zendeskGroup">Group</label> <br>
+          <input type="text" placeholder="Group Name" name="zendeskGroup" id="zendeskGroup" style="width: 196px;" value="{{groupName}}"/>
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label for="zendeskGSelect">Group Id</label> <br>
+          <input type="text" required placeholder="Group id" name="zendeskGSelect" id="zendeskGSelect" value="{{groupId}}"/>
+        </div>
+
+        <div class="form-group">
+          <label for="assigneeId">Assignee Name</label> <br>
+          <input type="text" placeholder="Assignee" name="assigneeName" id="assigneeName" style="width: 196px" disabled="disabled" value="{{assigneeName}}" />
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label for="assigneeId">Assignee Id</label> <br>
+          <input type="text" placeholder="Assignee id" name="assigneeId" id="assigneeId" value="{{assigneeId}}"/>
+        </div>
+
+        
+        <div class="form-group">
+          <div class="select" required = "required">
+            <label for="zenType">Ticket Type</label> <br>
+            <select id="zenType" required name="zenType"  style="width: auto;" size="1">
+              {{#each ticketType}}
+                <option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
+              {{/each}}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label for="dueDate">Due Date</label> <br>
+          <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" style="width: 196px;" value=""/>
+        </div>
+
+        <div class="form-group">
+          <label for="userSub">Subject</label> <br>
+          <input required placeholder="Enter Subject" type="text" name="userSub" id="userSub" style="width: 196px" value="{{subject}}"/>
+        </div>
+
+        <div class="form-group">
+          <label for="ticketDesc">Description</label> <br>
+          <textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please descibe the issue">{{desc}}</textarea>
+        </div>
+
+        <div class="form-group">
+          <button class='submitSpoke ember-view btn'>Create Single Ticket</button>
+        </div>
+
+      </div>
+    </div>
+
+</script>
+
+  </div>
+
+  <script type="text/javascript" src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+  <script src="lib/jquery.min.js"></script>
+  <script src="lib/vue.min.js"></script>
+  <script src="lib/vue-resource.min.js"></script>
+  <script src="lib/underscore.min.js"></script>
+  <script src="lib/bootstrap.min.js"></script>
+  <script src="lib/handlebars.min.js"></script>
+  
+  <script>
+    var client = ZAFClient.init();
+  </script>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
