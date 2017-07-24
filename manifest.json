@@ -25,15 +25,15 @@
   }, {
     "name": "defaultTicketType",
     "type": "text",
-                "required": false
+    "required": false
   }, {
     "name": "defaultTicketPriority",
     "type": "text",
-                "required": false
+    "required": false
   }, {
     "name": "customFieldIdsToCopy",
     "type": "text",
-                "required": false
+    "required": false
   }],
   "defaultLocale": "en",
   "private": true,
