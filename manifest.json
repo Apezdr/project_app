@@ -5,6 +5,36 @@
     "email": "rdilig@zendesk.com",
     "url": ""
   },
+  "parameters": [{
+    "name": "Custom_Field_ID",
+    "type": "text",
+    "required": true
+  }, {
+    "name": "prependSubject",
+    "type": "checkbox"
+  }, {
+    "name": "appendSubject",
+    "type": "checkbox"
+  }, {
+    "name": "settingsMap",
+    "type": "multiline",
+    "required": false
+  }, {
+    "name": "prefillAssignee",
+    "type": "checkbox"
+  }, {
+    "name": "defaultTicketType",
+    "type": "text",
+                "required": false
+  }, {
+    "name": "defaultTicketPriority",
+    "type": "text",
+                "required": false
+  }, {
+    "name": "customFieldIdsToCopy",
+    "type": "text",
+                "required": false
+  }],
   "defaultLocale": "en",
   "private": true,
   "location": {
