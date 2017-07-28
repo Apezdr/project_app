@@ -1,0 +1,33 @@
+{{#if projects.length}}
+  <div>
+    {{#each projects}}
+      {{#selected}}
+        <h5>Parent</h5>
+        <table class="table table-condensed">
+          <tbody>
+            <tr class="_tooltip" data-html="true" data-title="Type: {{type}}<br>Priority: {{priority}}<br>Assignee: {{assignee_id}}<br>Group: {{group_id}}">
+              <td><a href="#/tickets/{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+              <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      {{/selected}}
+    {{/each}}
+
+    <h5>Children</h5>
+    {{#each projects}}
+      {{^selected}}
+        <table class="table table-condensed">
+          <tbody>
+            <tr class="_tooltip" data-html="true" data-title="Type: {{type}}<br>Priority: {{priority}}<br>Assignee: {{assignee_id}}<br>Group: {{group_id}}">
+              <td><a href="#/tickets/{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+              <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      {{/selected}}
+    {{/each}}
+  </div>
+{{else}}
+  <p>Not currently in a Project</p>
+{{/if}}

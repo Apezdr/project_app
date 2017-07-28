@@ -1,12 +1,19 @@
-
 client.invoke('resize', { width: '100%', height: '200px' });
+
+$.handlebars({
+    templatePath: './templates',
+    templateExtension: 'hbs'
+});
+
+$('#app').render('noproject',{});
 
 var DATA = {
   objTicketFormResponse: {},
   objTicketFormData: {},
   objTicketForms: {},
   objGroupList: {},
-  objTicketFieldList: {},
+  arTicketFieldList: [],
+  arTicketField: [],
   arTicketList: [],
   strUserLocale: '',
   notEnterprise: false,
@@ -20,7 +27,7 @@ var DATA = {
   Custom_Field_ID: 0,
   prefillAssignee: '',
   objCurrentTicket: {},
-  objAssignees: {},
+  arAssignees: {},
   arAgentDrop: [],
   arGroupDrop: [],
   objGroups: {},
@@ -30,9 +37,8 @@ var DATA = {
 };
 
 var buildGroupList = function(objItem) {
-
   if ( _.isUndefined(DATA.objGroups[objItem.id]) ) {
-
+    
     DATA.objGroups[objItem.id] = objItem.name;
 
     //build an array for the ticket submit pages to create dropdown list
@@ -70,9 +76,9 @@ var buildTicketFormList = function(objItem) {
 
  var buildAgentList = function(objItem) {
 
-  if(objItem.role !== 'end-user' && _.isUndefined( DATA.objAssignees[objItem.id] )){
+  if(objItem.role !== 'end-user' && _.isUndefined( DATA.arAssignees[objItem.id] )){
 
-    DATA.objAssignees[objItem.id] = objItem.name;
+    DATA.arAssignees[objItem.id] = objItem.name;
 
     //build an array for the ticket submit pages to create dropdown list
     DATA.arAgentDrop.push({
@@ -83,16 +89,57 @@ var buildTicketFormList = function(objItem) {
   }
 };
 
+var buildTicketFieldList = function(objItem) {
+    // get default ticket form ID as necessary
+    if (objItem.active && objItem.removable === true) {
+      if(_.indexOf(DATA.arTicketFieldList, objItem.id) === -1) {
+        switch(objItem.type){
+          case 'text':
+            objItem.text = true;
+            break;
+          case 'textarea':
+            objItem.textarea = true;
+            break;
+          case 'tagger':
+            objItem.tagger = true;
+            break;
+          case 'basic_priority':
+            objItem.pri = true;
+            break;
+          case 'priority':
+            objItem.pri = true;
+            break;
+          case 'checkbox':
+            objItem.checkbox = true;
+            break;
+          case 'date':
+            objItem.date = true;
+            break;
+          case 'integer':
+            objItem.integer = true;
+            break;
+          case 'decimal':
+            objItem.decimal = true;
+            break;
+          case 'regexp':
+            objItem.regexp = true;
+            break;
+          default:
+            objItem.system = true;
+        }
+        DATA.arTicketFieldList.push(objItem.id);
+        DATA.arTicketField.push(objItem);
+      }
+    }
+    DATA.objTicketForms['1'] = DATA.arTicketFieldList;
+    DATA.defaultTicketFormID = 1;
+  };
+
 var buildTicketList = function(objItem) {
 
     var strProjectTag;
-
-    if (! _.isNull(objItem.external_id) && objItem.external_id != "") {
-      strProjectTag = objItem.external_id.replace(/-/i, '_').toLowerCase();
-    }
-
-    console.log('strProjectTag');
-    console.log(strProjectTag);
+   
+    strProjectTag = objItem.external_id.replace(/-/i, '_').toLowerCase();
     
     if ( ! _.contains(objItem.tags, strProjectTag) ) { return; }
 
@@ -110,6 +157,9 @@ var buildTicketList = function(objItem) {
         'subject': objItem.subject
       };
 
+      console.log('objitem.tags');
+      console.log(objItem.tags);
+
       var hasProjectChildTag = _.include(objItem.tags, 'project_child');
 
       if (hasProjectChildTag) {
@@ -126,13 +176,16 @@ var buildTicketList = function(objItem) {
         objList.selected = true;
       }
 
+      console.log('objList');
+      console.log(objList);
+
       DATA.arTicketList.push(objList);
 };
 
 function getTicketFormData() {
   client.get('currentUser.locale').then(function(objCurUser) {
     DATA.strUserLocale = objCurUser['currentUser.locale'];
-    this.getTicketForms(1);
+    getTicketForms(1);
   }.bind(this));
 }
 
@@ -146,14 +199,14 @@ function getTicketForms(intPage) {
 
   client.request(objRequest).then(function(objData) {
 
-    this.processTicketForms(objData);
+    processTicketForms(objData);
     DATA.objTicketFormResponse = objData;
 
   }.bind(this), function(error) {
 
     DATA.notEnterprise = true;
-    this.processTicketFields(1);
-    this.getProjectData();
+    processTicketFields(1);
+    getProjectData();
     console.error('Could not get ticket form data', error)
 
   });
@@ -168,7 +221,7 @@ function processTicketForms(objData) {
   if (objData.next_page !== null) {
 
     intNextPage = intNextPage + 1;
-    this.getTicketForms(intNextPage);
+    getTicketForms(intNextPage);
 
   } else {
     getProjectData();
@@ -187,10 +240,13 @@ function getProjectData() {
     DATA.prependSubject = metadata.settings.prependSubject;
     DATA.currentTicketformID = DATA.currentTicketformID || DATA.defaultTicketFormID;
     DATA.prefillAssignee = metadata.settings.prefillAssignee;    
+    DATA.Custom_Field_ID = metadata.settings.Custom_Field_ID;
 
     client.get('ticket').then(function(objTicket) {
+      console.log(objTicket);
       // get the external id
       getExternalID(objTicket.ticket.id);
+      DATA.currentTicketformID = objTicket.ticket.form.id || DATA.defaultTicketFormID;
       projectNameFieldExist();
     });
   });
@@ -198,8 +254,27 @@ function getProjectData() {
 
 function projectNameFieldExist() {
 
+  var thereAreNulls = [undefined, null, ''];
+
   if ( _.indexOf(DATA.objTicketForms[DATA.currentTicketformID], parseInt(DATA.Custom_Field_ID, 10)) !== -1 ) {
 
+    client.get('ticket.customField:custom_field_' + DATA.Custom_Field_ID).then(function(objTicket) {
+      
+      var isNotEmpty = (_.indexOf(thereAreNulls, objTicket['ticket.customField:custom_field_' + DATA.Custom_Field_ID]) === -1);
+
+      client.metadata().then(function(metadata) {
+        if (isNotEmpty) {
+          //if the field contains a value disable editing of the field
+          client.get('ticketFields:custom_field_' + metadata.settings.Custom_Field_ID).disable();
+        } else {
+          //if it’s not returned or empty hide the field
+          client.get('ticketFields:custom_field_' + metadata.settings.Custom_Field_ID).hide();
+        }
+      });
+      
+    }.bind(this));
+  } else {
+    return;
   }
 }
 
@@ -214,7 +289,7 @@ function getGroupsData(intPage) {
 
     client.request(objRequest).then(function(objData) {
 
-      DATA.objGroupList = objData;
+      _.each(objData.groups, buildGroupList, this);
 
       if (objData.next_page !== null) {
 
@@ -227,7 +302,7 @@ function getGroupsData(intPage) {
     })
 }
     
-function processTicketFields() {
+function processTicketFields(intPage) {
 
     var objRequest = {
       url: '/api/v2/ticket_fields.json?lang=' + DATA.strUserLocale + '&page=' + intPage,
@@ -238,20 +313,20 @@ function processTicketFields() {
     client.request(objRequest).then(function(objData) {
 
       var intNextPage = 1;
-      DATA.objTicketFieldList = objData;
+
+      _.each(objData.ticket_fields, buildTicketFieldList, this);
 
       if (objData.next_page !== null) {
 
         intNextPage = intNextPage + 1;
-        this.processTicketFields(intNextPage);
+        processTicketFields(intNextPage);
 
       } else {
 
         var arDisplayFields = [];
-        var arSelectedForm = app.ticketForms[$('#zendeskForm').val()];
+        var arSelectedForm = DATA.objTicketForms[$('#zendeskForm').val()];
 
-        $.each(DATA.objTicketFieldList, function(objList) {
-
+        DATA.arTicketField.forEach(function(objList) {
           if(_.contains(arSelectedForm, objList.id)){
 
               if(objList.type != "tickettype") {
@@ -260,6 +335,15 @@ function processTicketFields() {
 
             }
         });
+
+        console.log(arDisplayFields);
+
+        DATA.fieldsHTML = $('#custom-fields').render('_fields', {
+          fields: arDisplayFields
+        });
+
+        $('#zendeskForm').closest('.control-group').after(DATA.fieldsHTML);
+        processTicketFieldsData();
       }
 
     }.bind(this), function(error) {
@@ -267,15 +351,36 @@ function processTicketFields() {
     })
   }
 
-  function listProjects(objData) {
+  function processTicketFieldsData (){
+    //grab the custom field div find the input and make an array
+    var fieldListArray = $('#custom-fields :input').serializeArray();
+    //go through the array of current custom fields.
+    fieldListArray.forEach(function(t){
+      DATA.objCurrentTicket.ticket.custom_fields.forEach(function(x){
+        if($('#' + x.id )){
+          $('#' + x.id ).val(x.value);
+        }
+      }, this);
+    }, this);
 
+    client.get('ticket').then(function(objTicket) {
+      client.metadata().then(function(metadata) {
+        var priSetting = metadata.settings.defaultTicketPriority || objTicket.ticket.priority;
+        $('#zenPri').val(priSetting);
+      });
+    }.bind(this)); 
+  }
+
+  function listProjects(objData) {
+    console.log('objData list projects');
+    console.log(objData);
     var intNextPage = 1;
-    var btnClicked = (objData.type === 'click');
+    DATA.arTicketList = [];
 
     _.each(objData.users, buildAgentList, this);
     _.each(objData.groups, buildGroupList, this);
 
-    DATA.arTicketList = [];
+    var btnClicked = (objData.type === 'click');
 
     if (!btnClicked) {
       // resets solvable status before building Ticket List
@@ -295,8 +400,12 @@ function processTicketFields() {
     var objProjects = {
       projects: DATA.arTicketList
     }
-    
-    renderTemplate("project-lists", objProjects);
+
+    console.log('objProjects');
+    console.log(objProjects);
+
+    $('#app').render('project-list', objProjects);
+
     parentSolve();
 
     $('button.child').hide();
@@ -332,13 +441,6 @@ function processTicketFields() {
     }.bind(this));
   }
     
-  function renderTemplate(element, objData) {
-    // render
-    var source = $("#" + element).html();
-    var template = Handlebars.compile(source);
-    var html = template(objData);
-    $("#content").html(html);
-  }
 
   function switchToRequester () {
 
@@ -389,14 +491,77 @@ function processTicketFields() {
       console.log('objData here!!');
       console.log(objData);
 
-      this.renderTemplate("create-single-ticket", objData);
+      $('#app').render('requester', objData);
+
 
       if (strGroupID) {
         assignableAgents();
       }
 
+      $('button.displayList').show();
+      $('button.displayForm').hide();
+      $('button.displayMultiCreate').show();
+      autocompleteRequesterEmail();
+      autocompleteGroup();
+      if (DATA.notEnterprise) {
+        $('#zendeskForm').val(1);
+        $('#zendeskForm').parent().hide();
+      }
+      $('#zendeskForm').change();
+      $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+      if($('#zenType').val() === 'task'){
+        $('#dueDate').parent().show();
+      }
+
     }.bind(this));
   }
+
+  function autocompleteRequesterEmail() {
+    var self = this;
+    // bypass this.form to bind the autocomplete.
+    $('#userEmail').autocomplete({
+      minLength: 3,
+      source: function(request, response) {
+        self.ajax('autocompleteUser', request.term).done(function(data) {
+          response(_.map(data.users, function(user) {
+            return {
+              "label": user.name,
+              "value": user.email
+            };
+          }));
+        });
+      },
+      change: function(event, ui) {
+        if (_.isNull(ui.item)) {
+          $('#userName').parent().show();
+          $('#userName').focus();
+        }
+      }
+    }, this);
+  }
+
+  function autocompleteGroup() {
+      var self = this;
+      // bypass this.form to bind the autocomplete.
+      $('#zendeskGroup').autocomplete({
+        minLength: 3,
+        source: this.groupDrop,
+        select: function(event, ui) {
+          $("#zendeskGroup").val(ui.item.label);
+          $("#zendeskGSelect").val(ui.item.value);
+          return false;
+        },
+        change: function(event, ui) {
+          if (_.isNull(ui.item)) {
+            $("#zendeskGroup").val('');
+            $("#zendeskGSelect").val('');
+          } else {
+            $("#zendeskGroup").val(ui.item.label);
+            $("#zendeskGSelect").val(ui.item.value);
+          }
+        }
+      }, this);
+    }
 
   function getTicketTypes (strSelectedType){
 
@@ -408,9 +573,8 @@ function processTicketFields() {
       {'title': 'Problem', 'value': 'problem'}, 
       {'title': 'Task', 'value': 'task'}
     ];
-    
-    $.each(arTypes, function(objType) {
 
+    arTypes.forEach(function(objType) {
       if (objType.value === strSelectedType) {
         objType.selected = true;
       }
@@ -430,8 +594,10 @@ function processTicketFields() {
       client.request(objRequest).then(function(objData) {
 
         DATA.objCurrentTicket.ticket = objData.ticket;
+        var thereAreNulls = [undefined, null, ''];
+        var isNotEmpty = (_.indexOf(thereAreNulls, objData.ticket.external_id) === -1);
 
-        if (! _.isUndefined(objData.ticket.external_id) || ! _.isNull(objData.ticket.external_id)) {
+        if (isNotEmpty) {
           getProjectSearch(objData.ticket.external_id, 1);
         }
 
@@ -449,7 +615,9 @@ function processTicketFields() {
     };
 
     client.request(objRequest).then(function(objData) {
-      listProjects(objData);
+      console.log('objdata here...');
+      console.log(objData);
+      listProjects(objData || {});
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
     });
@@ -462,7 +630,7 @@ function processTicketFields() {
       return 'None';
     }
 
-    return DATA.objAssignees[intAssigneeID] || 'None';
+    return DATA.arAssignees[intAssigneeID] || 'None';
   }
 
   function groupName (intGroupID) {
@@ -514,7 +682,7 @@ function processTicketFields() {
     // bypass this.form to bind the autocomplete.
     $('#assigneeName').autocomplete({
       minLength: 3,
-      source: this.assignable,
+      source: assignable,
       select: function(event, ui) {
         $("#assigneeName").val(ui.item.label);
         $("#assigneeId").val(ui.item.value);
@@ -533,6 +701,7 @@ function processTicketFields() {
   }
 
   function createTicketValues() {
+    console.log('create ticket values');
     var arFieldList = $('#custom-fields :input').serializeArray();
     var arGroupSelected = [];
     DATA.arCreateResultsData = [];
@@ -544,12 +713,12 @@ function processTicketFields() {
     }
 
     client.get('ticket.id').then(function(objTicket) {
-
+  
       var intTicketID = objTicket['ticket.id'];
+      console.log('intTicketID');
+      console.log(intTicketID);
+      arGroupSelected.forEach(function(intGroupID) {
 
-       $.each(arGroupSelected, function(intGroupID) {
-          console.log('group id');
-          console.log(intGroupID);
           var objRootTicket = {};
           objRootTicket.ticket = {};
           objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
@@ -579,17 +748,15 @@ function processTicketFields() {
           client.metadata().then(function(metadata) {
             objRootTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = 'Project-' + intTicketID;
           });
-         
-          $.each(arFieldList, function(objField) {
+          
+          arFieldList.forEach(function(objField) {
             objRootTicket.ticket.custom_fields[objField.name] = objField.value;
           });
 
           duplicateCustomFieldsValues(objRootTicket.ticket);
-
-          var objTicketData = JSON.stringify(objRootTicket);
-          createTicket(objTicketData);
-       });
-
+          console.log('create ticket here...');
+          createTicket(objRootTicket);
+      });
     });
 
   }
@@ -630,8 +797,7 @@ function processTicketFields() {
       if (!_.has(ticketObjectForApi, 'custom_fields')) {
         ticketObjectForApi.custom_fields = {};
       }
-
-      $.each(customFieldIdsToCopy, function(customFieldIdToCopy) {
+      customFieldIdsToCopy.forEach(function(customFieldIdToCopy) {
 
         if (_.has(ticketObjectForApi.custom_fields, customFieldIdToCopy)) {
           return;
@@ -647,38 +813,86 @@ function processTicketFields() {
   }
 
   function processData(objData) {
-      client.get('ticket').then(function() {
+
+      client.get('ticket').then(function(objTicket) {
 
         var intTicketID = objTicket.ticket.id;
 
-        client.invoke('ticket.tags.add', ['project_parent', 'project_' + intTicketID]);
+        // client.invoke('ticket.tags.add', ['project_parent', 'project_' + intTicketID]);
+        addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
 
         client.metadata().then(function(metadata) {
-          client.set('ticket.customField:' + metadata.settings.Custom_Field_ID, 'Project-' + intTicketID);
-
-          if(! _.isUndefined(objData)) {
-
-            DATA.arCreateResultsData.push({
-              'id': objData.ticket.id,
-              'external_id': objData.ticket.external_id
-            });
-
-            renderTemplate("description", {
-               createResult: arCreateResultsData
-            });
-
-            var arCurrentTags = objTicket['ticket.tags'];
-
-            putTicketData(arCurrentTags, 'project_parent', 'add', objTicket);
-          }
+          client.set('ticket.customField:custom_field_' + metadata.settings.Custom_Field_ID, 'Project-' + intTicketID);
 
         });
+        console.log('objdata in process data');
+        console.log(objData);
+
+        if(! _.isUndefined(objData)) {
+
+          DATA.arCreateResultsData.push({
+            'id': objData.ticket.id,
+            'external_id': objData.ticket.external_id
+          });
+
+          $('#app').render('description',{createResult: DATA.arCreateResultsData});
+
+          var arCurrentTags = objTicket.ticket.tags;
+          console.log('current tags in process data');
+          console.log(arCurrentTags);
+          putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
+        }
 
       });
   }
 
+  function addTicketTags(arTags, intTicketID) {
+   
+    var objRequest = {
+      url:'/api/v2/tickets/' + intTicketID + '/tags.json',
+      type:'PUT',
+      dataType: 'json',
+      data: {
+        tags: arTags
+      }
+    };
+
+
+    client.request(objRequest).then(function(objData) {
+     console.log('success adding tags');
+     console.log(objData);
+
+    }.bind(this), function(error) {
+      console.error('Could not get ticket form data', error)
+    });
+  }
+
+  function removeTicketTags(arTags, intTicketID) {
+   
+    var objRequest = {
+      url:'/api/v2/tickets/' + intTicketID + '/tags.json',
+      type:'DELETE',
+      dataType: 'json',
+      data: {
+        tags: arTags
+      }
+    };
+
+
+    client.request(objRequest).then(function(objData) {
+     console.log('success removing tags');
+     console.log(objData);
+
+    }.bind(this), function(error) {
+      console.error('Could not get ticket form data', error)
+    });
+  }
+
   function putTicketData (arTags, strLinking, strType, objData) {
+
       var arTicketTags = arTags;
+      console.log('arTicketTags');
+      console.log(arTicketTags);
 
       var isParent = (_.indexOf(arTicketTags, 'project_parent') !== -1 || strLinking === 'project_parent');
 
@@ -689,66 +903,220 @@ function processTicketFields() {
       } else {
         intTicketUpdateID = objData;
       }
-      client.metadata().then(function(metadata) {
 
-        objUpdateTicket.ticket = {};
-        objUpdateTicket.ticket.custom_fields = {};
-        objUpdateTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = 'Project-' + objData.ticket.id;
-        objUpdateTicket.ticket.external_id = 'Project-' + objData.ticket.id;
+      client.get('ticket').then(function(objTicket) {
+        client.metadata().then(function(metadata) {
 
-        if (!isParent && strType === 'add') {
+          objUpdateTicket.ticket = {};
+          objUpdateTicket.ticket.custom_fields = {};
+          objUpdateTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = 'Project-' + objTicket.ticket.id;
+          objUpdateTicket.ticket.external_id = 'Project-' + objTicket.ticket.id;
 
-          arTicketTags.push(strLinking, 'project_' + objData.ticket.id);
+          if (!isParent && strType === 'add') {
 
-        } else if (!isParent && strType === 'remove') {
+            arTicketTags.push(strLinking, 'project_' + objTicket.ticket.id);
 
-          var projectTag = 'project_' + objData.ticket.external_id;
-          arTicketTags.splice(_.indexOf(arTags, "project_child"), 1);
-          arTicketTags.splice(_.indexOf(arTags, projectTag), 1);
-          objUpdateTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = '';
-          objUpdateTicket.ticket.external_id = '';
+          } else if (!isParent && strType === 'remove') {
 
-        } else {
-          arTicketTags.push(strLinking, 'project_' + this.ticket().id());
-        }
+            var projectTag = 'project_' + objData.ticket.external_id;
+            arTicketTags.splice(_.indexOf(arTags, "project_child"), 1);
+            arTicketTags.splice(_.indexOf(arTags, projectTag), 1);
+            objUpdateTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = '';
+            objUpdateTicket.ticket.external_id = '';
 
-        objUpdateTicket.ticket.arTags = arTicketTags;
-        var objTicketData = JSON.stringify(objUpdateTicket);
+          } else {
+            arTicketTags.push(strLinking, 'project_' + objTicket.ticket.id);
+          }
 
-        putExternalID(objTicketData, intTicketUpdateID);
-       
+          objUpdateTicket.ticket.arTags = arTicketTags;
+
+          putExternalID(objUpdateTicket, intTicketUpdateID);
+         
+        });
       });
   }
 
-  function putExternalID(objTicketData, objTicketUpdateID) {
-     // this.ajax('putExternalID', thisTicket, objTicketUpdateID).done(function(objData) {
-     //      this.processData();
-     //    });
+  function putExternalID(objTicketData, intTicketUpdateID) {
 
      var objRequest = {
-        url: '/api/v2/tickets/' + objTicketUpdateID + '.json',
-        type:'POST',
+        url: '/api/v2/tickets/' + intTicketUpdateID + '.json',
+        type:'PUT',
         dataType: 'json',
         data: objTicketData
     };
 
     client.request(objRequest).then(function(objData) {
-
-        processData(objData);
-
+        processData();
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
     });
   }
 
+  function updateList() {
+    client.get('ticket').then(function(objTicket) {
+      getExternalID(objTicket.ticket.id);
+    });
+    
+  }
+
+  function switchToBulk() {
+
+    client.get('ticket').then(function(objTicket) {
+        
+      var strNewSubject = objTicket.ticket.subject;
+
+      if (DATA.prependSubject) {
+        strNewSubject = 'Project-' + objTicket.ticket.id + ' ' + strNewSubject;
+      }
+
+      if (DATA.appendSubject) {
+        strNewSubject = strNewSubject + ' Project-' + objTicket.ticket.id;
+      }
+
+      client.metadata().then(function(metadata) {
+        var intAssigneeID, strAssigneeName;
+        var strTicketType = getTicketTypes(metadata.settings.defaultTicketType) || objTicket.ticket.type;
+        var intCurrentFormID = objTicket.ticket.form.id;
+
+        if (metadata.settings.prefillAssignee) {
+
+          if (objTicket.ticket.assignee.user) {
+            strAssigneeName = objTicket.ticket.assignee.user.name;
+            intAssigneeID = objTicket.ticket.assignee.user.id;
+          }
+
+        }
+
+        console.log('objTicketForms');
+        console.log(DATA.objTicketForms);
+
+        $('#app').render('multicreate',{
+          ticketForm: DATA.objTicketForms,
+          currentForm: intCurrentFormID,
+          email: objTicket.ticket.requester.email,
+          assigneeName: strAssigneeName,
+          assigneeId: intAssigneeID,
+          groups: DATA.arGroupDrop,
+          subject: strNewSubject,
+          desc: objTicket.ticket.description,
+          ticketType: strTicketType
+        });
+
+        $('button.displayList').show();
+        $('button.displayForm').show();
+        $('button.displayMultiCreate').hide();
+        autocompleteRequesterEmail();
+        if (DATA.notEnterprise) {
+          $('#zendeskForm').val(1);
+          $('#zendeskForm').parent().hide();
+        }
+        $('#zendeskForm').change();
+        $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+        if($('#zenType').val() === 'task'){
+          $('#dueDate').parent().show();
+        }
+
+      });
+
+    });
+  }
+
+  function switchToUpdate() {
+    console.log('switch to update');
+    $('#app').render('updateTickets',{});
+  }
+
+  function createBulkTickets() {
+    createTicketValues();
+  }
+
+  function updateTickets() {
+     
+    var arList = $('#listofIDs').val().split(/,|\s/);
+
+    client.get('ticket').then(function(objTicket) {
+       //update the the current ticket
+      var arCurrentTags = objTicket.ticket.tags;
+      putTicketData(arCurrentTags, 'project_parent', 'add', objTicket.ticket.id);
+      //get the list supplied and update the ticket.
+      arList.forEach(function(intTicketID) {
+         var objRequest = {
+          url:'/api/v2/tickets/' + intTicketID + '.json',
+          type:'GET',
+          dataType: 'json',
+        };
+
+        client.request(objRequest).then(function(objData) {
+
+          if ((objData.ticket.status !== 'closed') && (_.indexOf(objData.ticket.tags, 'project_child') === -1)) {
+            console.log('put ticket data');
+            putTicketData(objData.ticket.tags, 'project_child', 'add', objData);
+          } else if (objData.ticket.status === 'closed') {
+            console.log('notify closed');
+            client.invoke('notify', objData.ticket.id + ' is closed', 'error');
+          } else if (_.indexOf(objData.ticket.tags, 'project_child') !== -1) {
+             console.log('notify error');
+            client.invoke('notify', 'Ticket ' + objData.ticket.id + ' is already a member of another project: ' + objData.ticket.external_id + ' ', 'error');
+          }
+
+        }.bind(this), function(error) {
+          console.error('Could not get ticket form data', error)
+        });
+      });
+
+     
+    });
+  }
+
+  function formSelected() {
+    $('#custom-fields').remove();
+    DATA.fieldsHTML = '';
+    getTicketFieldsData();
+  }
+
+  function getTicketFieldsData (page){
+    processTicketFields();
+  }
+
+  function removeFrom() {
+   
+    client.get('ticket').then(function(objTicket) {
+
+      var intTicketID = objTicket.ticket.id;
+
+      var objRequest = {
+        url: '/api/v2/tickets/' + objTicket.ticket.id + '.json',
+        type:'GET',
+        dataType: 'json'
+      };
+
+      client.request(objRequest).then(function(objData) {
+
+        putTicketData(objData.ticket.tags, 'project_child', 'remove', objData);
+
+        var projectTag = objData.ticket.external_id.replace(/-/i, '_').toLowerCase();
+
+        removeTicketTags(['project_child', projectTag], intTicketID);
+       
+        client.metadata().then(function(metadata) {
+          client.set('ticket.customField:custom_field_' + metadata.settings.Custom_Field_ID, '');
+        });
+
+      }.bind(this), function(error) {
+        console.error('Could not get ticket form data', error)
+      });
+    });
+  
+   
+  }
 
   // document ready
   $(document).ready(function() {
 
     getTicketFormData();
 
-    $('#listProjects').on('click', function() {
-      listProjects();
+    $('.makeproj').on('click', function(objData) {
+      listProjects(objData);
     });
 
     $(document).on('click', '.displayForm', function() {
@@ -756,10 +1124,43 @@ function processTicketFields() {
     });
 
     $(document).on('click', '.submitSpoke', function() {
+      console.log('submit spoke');
       createTicketValues();
     });
 
+    $(document).on('click', '.displayList', function() {
+      updateList();
+    });
+
+    $(document).on('click', '.displayMultiCreate', function() {
+      switchToBulk();
+    });
+
+    $(document).on('click', '.displayUpdate', function() {
+      switchToUpdate();
+    });
+
+    $(document).on('click', '.submitBulk', function() {
+      createBulkTickets();
+    });
+
+    $(document).on('click', '.updateticket', function() {
+      updateTickets();
+    });
+
+    $(document).on('change', '#zendeskForm', function() {
+      formSelected();
+    });
+
+    $(document).on('click', '.removeTicket', function() {
+      removeFrom();
+    });
+
   });
+
+
+
+
 
 
 

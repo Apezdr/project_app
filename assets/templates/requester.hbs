@@ -1,0 +1,70 @@
+<div class="row-fluid">
+	<div class="well span12">
+    <div class="control-group">
+      <label for="zendeskForm">Ticket Form</label>
+      <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
+        <option value="">-</option>
+        {{#each ticketForm}}
+          <option value="{{id}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="userEmail">Requester</label>
+      <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" style="width: 196px" value="{{email}}"/>
+    </div>
+
+    <div class="control-group" style="display: none;">
+      <label for="userName">Requester Name</label>
+      <input type="text" required placeholder="Requester Name" name="userName" id="userName" style="width: 196px;" value=""/>
+    </div>
+
+    <div class="control-group">
+      <label for="zendeskGroup">Group</label>
+      <input type="text" placeholder="Group Name" name="zendeskGroup" id="zendeskGroup" style="width: 196px;" value="{{groupName}}"/>
+    </div>
+
+    <div class="control-group" style="display: none;">
+      <label for="zendeskGSelect">Group Id</label>
+      <input type="text" required placeholder="Group id" name="zendeskGSelect" id="zendeskGSelect" value="{{groupId}}"/>
+    </div>
+		<div class="control-group">
+			<label for="assigneeId">Assignee Name</label>
+			<input type="text" placeholder="Assignee" name="assigneeName" id="assigneeName" style="width: 196px" disabled="disabled" value="{{assigneeName}}" />
+		</div>
+
+		<div class="control-group" style="display: none;">
+			<label for="assigneeId">Assignee Id</label>
+			<input type="text" placeholder="Assignee id" name="assigneeId" id="assigneeId" value="{{assigneeId}}"/>
+		</div>
+		<div class="control-group">
+			<div class="select" required = "required">
+				<label for="zenType">Ticket Type</label>
+				<select id="zenType" required name="zenType"  style="width: auto;" size="1">
+					{{#each ticketType}}
+						<option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
+					{{/each}}
+				</select>
+			</div>
+		</div>
+    <div class="control-group" style="display: none;">
+      <label for="dueDate">Due Date</label>
+      <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" style="width: 196px;" value=""/>
+    </div>
+
+    <div class="control-group">
+      <label for="userSub">Subject</label>
+      <input required placeholder="Enter Subject" type="text" name="userSub" id="userSub" style="width: 196px" value="{{subject}}"/>
+    </div>
+
+    <div class="control-group">
+      <label for="ticketDesc">Description</label>
+      <textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please Describe the issue">{{desc}}</textarea>
+    </div>
+
+    <div class="control-group">
+      <button class='submitSpoke ember-view btn'>Create Single Ticket</button>
+    </div>
+  </div>
+</div>

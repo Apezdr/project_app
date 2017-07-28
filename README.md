@@ -1,14 +1,6 @@
-# App name
+:warning: *Use of this software is subject to important terms and conditions as set forth in the License file* :warning: 
 
-[brief description of the app]
+Five Most Recent Tickets App
+====================
 
-### The following information is displayed:
-
-* info1
-* info2
-* info3
-
-Please submit bug reports to [Insert Link](). Pull requests are welcome.
-
-### Screenshot(s):
-[put your screenshots down here.]
+The Zendesk Five Most Recent Tickets App provides you with the simple feature of displaying the 5 most recent tickets of a given user on the right hand side of his current ticket. Please send issues to [support@zendesk.com](mailto:support@zendesk.com). Pull requests are welcome.
