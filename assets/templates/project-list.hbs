@@ -5,8 +5,8 @@
         <h5>Parent</h5>
         <table class="table table-condensed">
           <tbody>
-            <tr class="_tooltip" data-html="true" data-title="Type: {{type}}<br>Priority: {{priority}}<br>Assignee: {{assignee_id}}<br>Group: {{group_id}}">
-              <td><a href="#/tickets/{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+            <tr class="tooltip arrow-left" title="Type: {{type}} Priority: {{priority}} Assignee: {{assignee_id}} Group: {{group_id}}">
+              <td><a href="#" class="open-ticket-tab" data-id="{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
               <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
             </tr>
           </tbody>
@@ -19,8 +19,8 @@
       {{^selected}}
         <table class="table table-condensed">
           <tbody>
-            <tr class="_tooltip" data-html="true" data-title="Type: {{type}}<br>Priority: {{priority}}<br>Assignee: {{assignee_id}}<br>Group: {{group_id}}">
-              <td><a href="#/tickets/{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+            <tr class="tooltip arrow-left" title="Type: {{type}} Priority: {{priority}} Assignee: {{assignee_id}} Group: {{group_id}}">
+              <td><a href="#" class="open-ticket-tab" data-id="{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
               <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
             </tr>
           </tbody>

@@ -10,6 +10,9 @@
       </select>
     </div>
 
+    <div class="control-group" id="custom-fields-row">
+    </div>
+
     <div class="control-group">
       <label for="userEmail">Requester</label>
       <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" style="width: 196px" value="{{email}}"/>
@@ -24,7 +27,7 @@
       <label for="zendeskGroup">Group</label>
       <input type="text" placeholder="Group Name" name="zendeskGroup" id="zendeskGroup" style="width: 196px;" value="{{groupName}}"/>
     </div>
-
+    <br>
     <div class="control-group" style="display: none;">
       <label for="zendeskGSelect">Group Id</label>
       <input type="text" required placeholder="Group id" name="zendeskGSelect" id="zendeskGSelect" value="{{groupId}}"/>
@@ -57,7 +60,7 @@
       <label for="userSub">Subject</label>
       <input required placeholder="Enter Subject" type="text" name="userSub" id="userSub" style="width: 196px" value="{{subject}}"/>
     </div>
-
+    <br>
     <div class="control-group">
       <label for="ticketDesc">Description</label>
       <textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please Describe the issue">{{desc}}</textarea>

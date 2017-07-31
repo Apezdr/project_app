@@ -3,29 +3,36 @@
   <head>
     <meta charset="UTF-8">
     <title>Project App V2</title>
+    <link href="http://garden.zendesk.com/index.css" rel="stylesheet">
+    <link href="http://garden.zendesk.com/editor.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
     <link rel="stylesheet" href="stylesheets/main.css">
-    <script src="https://cdn.jsdelivr.net/g/lodash@4.3.0,handlebarsjs@4.0.5,jquery@3.2.1,momentjs@2.9.0,bootstrap@2.3.2"></script>
-    <script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
-    <script type="text/javascript" src="lib/javascripts/jquery-handlebars-1.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+     <script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
   </head>
   <body>
-  <div class="navigation-buttons centered">
-    <button class='displayList ember-view btn'>Project List</button>
-    <button class='parent displayForm ember-view btn'>Create Single</button>
-    <button class='parent displayMultiCreate ember-view btn'>Create Bulk</button>
-    <button class='parent displayUpdate ember-view btn'>Add Existing</button>
-    <button class='child removeTicket ember-view btn'>Remove ticket from project</button>
-  </div>
-  <div id="app">
-   
-  </div>
-    
+    <div class="navigation-buttons centered">
+      <button class='displayList ember-view btn'>Project List</button>
+      <button class='parent displayForm ember-view btn'>Create Single</button>
+      <button class='parent displayMultiCreate ember-view btn'>Create Bulk</button>
+      <button class='parent displayUpdate ember-view btn'>Add Existing</button>
+      <button class='child removeTicket ember-view btn'>Remove ticket from project</button>
+    </div>
+
+    <div id="app"></div>
 
     <script>
       var client = ZAFClient.init();
     </script>
-    <script type="text/javascript" src="lib/javascripts/vue.min.js"></script>
+
+  
+
+ 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="lib/javascripts/jquery-handlebars-1.1.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <script src="main.js"></script>
+
   </body>
 </html>
