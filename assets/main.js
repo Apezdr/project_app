@@ -1,12 +1,15 @@
 client.invoke('resize', { width: '100%', height: 'auto' });
 
+// add template path
 $.handlebars({
     templatePath: './templates',
     templateExtension: 'hbs'
 });
 
+// render default template
 $('#app').render('noproject',{});
 
+// global variable
 var DATA = {
   objTicketFormResponse: {},
   objTicketFormData: {},
@@ -37,7 +40,8 @@ var DATA = {
   isPublic: true,
   strTicketDescription: '',
   strNewTicketDescription: '',
-  intTicketID: 0
+  intTicketID: 0,
+  objCustomFieldMapping: {}
 };
 
 var buildGroupList = function(objItem) {
@@ -94,6 +98,8 @@ var buildTicketFormList = function(objItem) {
 };
 
 var buildTicketFieldList = function(objItem) {
+  console.log('objItem here');
+  console.log(objItem);
     // get default ticket form ID as necessary
     if (objItem.active && objItem.removable === true) {
       if(_.indexOf(DATA.arTicketFieldList, objItem.id) === -1) {
@@ -181,10 +187,12 @@ var buildTicketList = function(objItem) {
 };
 
 function getTicketFormData() {
+
   client.get('currentUser.locale').then(function(objCurUser) {
     DATA.strUserLocale = objCurUser['currentUser.locale'];
     getTicketForms(1);
   }.bind(this));
+
 }
 
 function getTicketForms(intPage) {
@@ -241,7 +249,6 @@ function getProjectData() {
     DATA.Custom_Field_ID = metadata.settings.Custom_Field_ID;
 
     client.get('ticket').then(function(objTicket) {
-      console.log(objTicket);
       // get the external id
       getExternalID(objTicket.ticket.id);
       DATA.currentTicketformID = objTicket.ticket.form.id || DATA.defaultTicketFormID;
@@ -437,7 +444,7 @@ function processTicketFields(intPage) {
     
 
   function switchToRequester () {
-
+    client.invoke('resize', { width: '100%', height: '350px' });
     var strAssigneeID, strAssigneeName, strGroupName, strGroupID;
     
     var arTicketType = getTicketTypes(); 
@@ -709,66 +716,94 @@ function processTicketFields(intPage) {
       var intTicketID = objTicket['ticket.id'];
 
       var intNoOfTickets = parseInt($('#childTicketNo').val());
+      console.log(intNoOfTickets);
+      if (! _.isNaN(intNoOfTickets)) {
+        
+        if (intNoOfTickets < 1 || intNoOfTickets > 100 || _.isNaN(intNoOfTickets)) {
 
-      if (intNoOfTickets < 1 || intNoOfTickets > 100) {
-        client.invoke('notify', 'Please enter a value between 1 - 100 only');
-      } else {
+          client.invoke('notify', 'Please enter a value between 1 - 100 only', 'error');
 
-        for (var i = 0; i < intNoOfTickets; i++) {
-          
-          arGroupSelected.forEach(function(intGroupID) {
+        } else {
 
-            var objRootTicket = {};
-            objRootTicket.ticket = {};
-            objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
-            objRootTicket.ticket.subject = $('#userSub').val();
-            objRootTicket.ticket.due_at = $('#dueDate').val();
-            objRootTicket.ticket.type = $('#zenType').val();
-            objRootTicket.ticket.priority = $('#zenPri').val();
-            objRootTicket.ticket.comment = {};
-            objRootTicket.ticket.comment.value = $('#ticketDesc').val();
-            objRootTicket.ticket.requester = {};
-
-            if ($('#userName').val() !== '') {
-              objRootTicket.ticket.requester.name = $('#userName').val();
-            }
-
-            objRootTicket.ticket.requester.email = $('#userEmail').val();
-
-            if (!_.isEmpty($('#assigneeId').val())) {
-                objRootTicket.ticket.assignee_id = $('#assigneeId').val();
-            }
-
-            objRootTicket.ticket.group_id = intGroupID;
-            objRootTicket.ticket.external_id = 'Project-' + intTicketID;
-            objRootTicket.ticket.tags = ['project_child', 'project_' + intTicketID];
-            objRootTicket.ticket.custom_fields = {};
-
-            client.metadata().then(function(metadata) {
-              objRootTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = 'Project-' + intTicketID;
-            });
-            
-            arFieldList.forEach(function(objField) {
-              objRootTicket.ticket.custom_fields[objField.name] = objField.value;
-            });
-
-            duplicateCustomFieldsValues(objRootTicket.ticket);
-
-            var isCopyDescription = $('#copyDescription').is(':checked');
-
-            if (! isCopyDescription) {
-              objRootTicket.ticket.comment.public = false;
-            } 
-           console.log('objRootTicket');
-           console.log(objRootTicket);
-            createTicket(objRootTicket);
-          });
-
+          for (var i = 0; i < intNoOfTickets; i++) {
+            proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
+          }
         }
-
+      } else {
+        proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
       }
+
     });
 
+  }
+
+  function proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList) {
+    console.log('arGroupSelected');
+    console.log(arGroupSelected);
+
+    if (! _.isEmpty(arGroupSelected)) {
+
+      arGroupSelected.forEach(function(intGroupID) {
+
+          var objRootTicket = {};
+          objRootTicket.ticket = {};
+          objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
+          objRootTicket.ticket.subject = $('#userSub').val();
+          objRootTicket.ticket.due_at = $('#dueDate').val();
+          objRootTicket.ticket.type = $('#zenType').val();
+          objRootTicket.ticket.priority = $('#zenPri').val();
+          objRootTicket.ticket.comment = {};
+          objRootTicket.ticket.comment.value = $('#ticketDesc').val();
+          objRootTicket.ticket.requester = {};
+
+          if ($('#userName').val() !== '') {
+            objRootTicket.ticket.requester.name = $('#userName').val();
+          }
+
+          objRootTicket.ticket.requester.email = $('#userEmail').val();
+
+          if (!_.isEmpty($('#assigneeId').val())) {
+              objRootTicket.ticket.assignee_id = $('#assigneeId').val();
+          }
+
+          objRootTicket.ticket.group_id = intGroupID;
+          objRootTicket.ticket.external_id = 'Project-' + intTicketID;
+          objRootTicket.ticket.tags = ['project_child', 'project_' + intTicketID];
+          objRootTicket.ticket.custom_fields = {};
+
+          client.metadata().then(function(metadata) {
+            objRootTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = 'Project-' + intTicketID;
+          });
+          
+          arFieldList.forEach(function(objField) {
+            objRootTicket.ticket.custom_fields[objField.name] = objField.value;
+          }); 
+           var obj = {}
+          $.each(DATA.objCustomFieldMapping, function(key, value) {
+            // need to change the value?
+            if (value != "=") { 
+              objRootTicket.ticket.custom_fields[key] = value;
+            }
+            
+          });
+
+          duplicateCustomFieldsValues(objRootTicket.ticket);
+
+          var isCopyDescription = $('#copyDescription').is(':checked');
+
+          if (! isCopyDescription) {
+            objRootTicket.ticket.comment.public = false;
+          }
+
+          console.log('objRootTicket here');
+          console.log(objRootTicket);
+        
+          createTicket(objRootTicket);
+      });
+    } else {
+       client.invoke('notify', 'Please select a group', 'error');
+    }
+    
   }
 
   function createTicket(objTicketData) {
@@ -889,12 +924,13 @@ function processTicketFields(intPage) {
     });
   }
 
-  function putTicketData (arTags, strLinking, strType, objData) {
+  function putTicketData (arTags, strLinking, strType, objData, strLinkedTicketType) {
       var arTicketTags = arTags;
 
       var isParent = (_.indexOf(arTicketTags, 'project_parent') !== -1 || strLinking === 'project_parent');
 
       var intTicketUpdateID, objUpdateTicket = {};
+
 
       if (_.isObject(objData)) {
         intTicketUpdateID = objData.ticket.id;
@@ -919,6 +955,7 @@ function processTicketFields(intPage) {
             var strProjectTag = 'project_' + objData.ticket.external_id;
 
             arTicketTags.splice(_.indexOf(arTags, "project_child"), 1);
+            
             arTicketTags.splice(_.indexOf(arTags, strProjectTag), 1);
 
             objUpdateTicket.ticket.custom_fields[metadata.settings.Custom_Field_ID] = '';
@@ -928,7 +965,7 @@ function processTicketFields(intPage) {
             arTicketTags.push(strLinking, 'project_' + objTicket.ticket.id);
           }
 
-          objUpdateTicket.ticket.arTags = arTicketTags;
+          objUpdateTicket.ticket.tags = arTicketTags;
 
           putExternalID(objUpdateTicket, intTicketUpdateID);
          
@@ -960,7 +997,9 @@ function processTicketFields(intPage) {
   }
 
   function switchToBulk() {
-    console.log('switch to bulk');
+
+    client.invoke('resize', { width: '100%', height: '350px' });
+
     client.get('ticket').then(function(objTicket) {
         
       var strNewSubject = objTicket.ticket.subject;
@@ -968,8 +1007,6 @@ function processTicketFields(intPage) {
       DATA.strTicketDescription = objTicket.ticket.description;
       DATA.intTicketID = intTicketID;
 
-      console.log('description');
-      console.log(DATA.strTicketDescription);
 
       if (DATA.prependSubject) {
         strNewSubject = 'Project-' + intTicketID + ' ' + strNewSubject;
@@ -1036,11 +1073,18 @@ function processTicketFields(intPage) {
   function updateTickets() {
      
     var arList = $('#listofIDs').val().split(/,|\s/);
+    var strLinkedTicketType = $('#linkedTicketType').val();
 
     client.get('ticket').then(function(objTicket) {
        //update the the current ticket
       var arCurrentTags = objTicket.ticket.tags;
-      putTicketData(arCurrentTags, 'project_parent', 'add', objTicket.ticket.id);
+
+      if (strLinkedTicketType == "child_ticket") {
+        putTicketData(arCurrentTags, 'project_child', 'add', objTicket.ticket.id);
+      } else {
+        putTicketData(arCurrentTags, 'project_parent', 'add', objTicket.ticket.id);
+      }
+      
       //get the list supplied and update the ticket.
       arList.forEach(function(intTicketID) {
          var objRequest = {
@@ -1060,13 +1104,16 @@ function processTicketFields(intPage) {
           }
 
           if ((objData.ticket.status !== 'closed') && (_.indexOf(objData.ticket.tags, 'project_child') === -1)) {
-            console.log('put ticket data');
-            putTicketData(objData.ticket.tags, 'project_child', 'add', objData);
+           
+            if (strLinkedTicketType == "child_ticket") {
+              putTicketData(objData.ticket.tags, "project_parent", 'add', objData);
+            } else {
+              putTicketData(objData.ticket.tags, "project_child", 'add', objData);
+            }
+            
           } else if (objData.ticket.status === 'closed') {
-            console.log('notify closed');
             client.invoke('notify', objData.ticket.id + ' is closed', 'error');
           } else if (_.indexOf(objData.ticket.tags, 'project_child') !== -1) {
-             console.log('notify error');
             client.invoke('notify', 'Ticket ' + objData.ticket.id + ' is already a member of another project: ' + objData.ticket.external_id + ' ', 'error');
           }
 
@@ -1101,11 +1148,12 @@ function processTicketFields(intPage) {
       };
 
       client.request(objRequest).then(function(objData) {
-        console.log('ticket objdata');
-        console.log(objData);
         DATA.objCurrentTicket.ticket = objData.ticket;
+
         var thereAreNulls = [undefined, null, ''];
+
         var isNotEmpty = (_.indexOf(thereAreNulls, objData.ticket.external_id) === -1);
+
         if (isNotEmpty) {
           getProjectSearch(objData.ticket.external_id, 1);
         }
@@ -1126,84 +1174,109 @@ function processTicketFields(intPage) {
     });
   }
 
+  function validateMapping() {
 
+    client.metadata().then(function(metadata) {
+      var objCustomFieldMapping = metadata.settings.custom_field_mapping;
 
-  $(document).on('click', '.displayForm', function() {
-      switchToRequester();
-    });
+      if (! _.isUndefined(objCustomFieldMapping)) {
+        
+        if (validateJSON(objCustomFieldMapping)) {
 
-  // document ready
-  $(document).ready(function() {
-    // tooltip
-    $(document).tooltip();
-
-    getTicketFormData();
-
-    $('.makeproj').on('click', function(objData) {
-      listProjects(objData);
-    });
-
-    
-    $(document).on('click', '.submitSpoke', function() {
-      console.log('submit spoke');
-      createTicketValues();
-    });
-
-    $(document).on('click', '.displayList', function() {
-      updateList();
-    });
-
-    $(document).on('click', '.displayMultiCreate', function() {
-      switchToBulk();
-    });
-
-    $(document).on('click', '.displayUpdate', function() {
-      switchToUpdate();
-    });
-
-    $(document).on('click', '.submitBulk', function() {
-      createBulkTickets();
-    });
-
-    $(document).on('click', '.updateticket', function() {
-      updateTickets();
-    });
-
-    $(document).on('change', '#zendeskForm', function() {
-      formSelected();
-    });
-
-    $(document).on('click', '.removeTicket', function() {
-      removeFromProject();
-    });
-
-    $(document).on('click', '.open-ticket-tab', function() {
-      console.log('open ticket tab');
-      // get ticket id
-      var intTicketID = $(this).data('id');
-      // open new ticket tab
-      client.invoke('routeTo', 'ticket', intTicketID);
-    });
-
-    $(document).on('keyup', '#zendeskGroup', function() {
-      autocompleteGroup();
-    });
-
-    $(document).on('keyup', '#userEmail', function() {
-      autocompleteRequesterEmail();
-    });
-
-    $(document).on('change', '#copyDescription', function() {
-      console.log(DATA.strNewTicketDescription);
-      if ( $(this).is(':checked')) {
-        $('#ticketDesc').val(DATA.strTicketDescription);
-      } else {
-        $('#ticketDesc').val("Child of Ticket #" + DATA.intTicketID);
+          DATA.objCustomFieldMapping = JSON.parse(objCustomFieldMapping);
+         
+        } else {
+          client.invoke('notify', 'Custom Field Mapping is not a valid JSON', 'error');
+        }
       }
+      
 
     });
+  }
 
+  function validateJSON(objJSON) {
+    try {
+      JSON.parse(objJSON);
+    } catch(ex) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // EVENTS
+
+  $(document).on('click', '.makeproj', function(objData) {
+    listProjects(objData);
   });
+
+  
+  $(document).on('click', '.submitSpoke', function() {
+    createTicketValues();
+  });
+
+  $(document).on('click', '.displayList', function() {
+    updateList();
+  });
+
+  $(document).on('click', '.displayMultiCreate', function() {
+    switchToBulk();
+  });
+
+  $(document).on('click', '.displayUpdate', function() {
+    switchToUpdate();
+  });
+
+  $(document).on('click', '.submitBulk', function() {
+    createBulkTickets();
+  });
+
+  $(document).on('click', '.updateticket', function() {
+    updateTickets();
+  });
+
+  $(document).on('change', '#zendeskForm', function() {
+    formSelected();
+  });
+
+  $(document).on('click', '.removeTicket', function() {
+    removeFromProject();
+  });
+
+  $(document).on('click', '.open-ticket-tab', function() {
+    // get ticket id
+    var intTicketID = $(this).data('id');
+    // open new ticket tab
+    client.invoke('routeTo', 'ticket', intTicketID);
+  });
+
+  $(document).on('keyup', '#zendeskGroup', function() {
+    autocompleteGroup();
+  });
+
+  $(document).on('keyup', '#userEmail', function() {
+    autocompleteRequesterEmail();
+  });
+
+    $(document).on('click', '.displayForm', function() {
+    switchToRequester();
+  });
+
+
+  $(document).on('change', '#copyDescription', function() {
+    if ( $(this).is(':checked')) {
+      $('#ticketDesc').val(DATA.strTicketDescription);
+    } else {
+      $('#ticketDesc').val("Child of Ticket #" + DATA.intTicketID);
+    }
+  });
+
+  $(document).tooltip();
+
+  validateMapping();
+
+  getTicketFormData();
+
 
 
 

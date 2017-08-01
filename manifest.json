@@ -34,6 +34,10 @@
     "name": "customFieldIdsToCopy",
     "type": "text",
     "required": false
+  }, {
+    "name": "custom_field_mapping",
+    "type": "multiline",
+    "required": false
   }],
   "defaultLocale": "en",
   "private": true,
