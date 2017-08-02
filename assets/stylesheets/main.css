@@ -229,6 +229,11 @@ a:hover {
   text-decoration: none;
 }
 
-
-
+.tooltip-styling{
+  background: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 10px;
+  box-shadow: none;
+}
 

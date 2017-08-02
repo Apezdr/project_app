@@ -1,4 +1,5 @@
-client.invoke('resize', { width: '100%', height: 'auto' });
+resizeApp();
+
 
 // add template path
 $.handlebars({
@@ -87,7 +88,8 @@ var buildTicketFormList = function(objItem) {
   if(objItem.role !== 'end-user' && _.isUndefined( DATA.arAssignees[objItem.id] )){
 
     DATA.arAssignees[objItem.id] = objItem.name;
-
+    console.log('arAssignees');
+    console.log(DATA.arAssignees);
     //build an array for the ticket submit pages to create dropdown list
     DATA.arAgentDrop.push({
       'label': objItem.name,
@@ -377,7 +379,7 @@ function processTicketFields(intPage) {
   function listProjects(objData) {
     var intNextPage = 1;
     DATA.arTicketList = [];
-
+    console.log('list projects');
     _.each(objData.users, buildAgentList, this);
     _.each(objData.groups, buildGroupList, this);
 
@@ -391,10 +393,11 @@ function processTicketFields(intPage) {
       _.each(objData.tickets, buildTicketList, this);
 
       if (objData.next_page !== null) {
-
+        console.log('objData next_page');
+        console.log(objData);
         intNextPage = intNextPage + 1;
-        getProjectSearch(objData.ticket[0].external_id, intNextPage);
 
+        getProjectSearch(objData.tickets[0].external_id, intNextPage);
       }
     }
 
@@ -402,7 +405,7 @@ function processTicketFields(intPage) {
       projects: DATA.arTicketList
     }
 
-    console.log('objProjects');
+    console.log('objProjects!');
     console.log(objProjects);
 
     $('#app').render('project-list', objProjects);
@@ -444,6 +447,7 @@ function processTicketFields(intPage) {
     
 
   function switchToRequester () {
+    // resizeApp();
     client.invoke('resize', { width: '100%', height: '350px' });
     var strAssigneeID, strAssigneeName, strGroupName, strGroupID;
     
@@ -489,7 +493,7 @@ function processTicketFields(intPage) {
       $('#app').render('requester', objData);
 
       if (strGroupID) {
-        assignableAgents();
+        assignableAgents($("#zendeskGSelect").val(), 1);
       }
 
       $('button.displayList').show();
@@ -544,26 +548,48 @@ function processTicketFields(intPage) {
   }
 
   function autocompleteGroup() {
-      $('#zendeskGroup').autocomplete({
-        minLength: 3,
-        source: DATA.arGroupDrop,
-        select: function(event, ui) {
+    $('#zendeskGroup').autocomplete({
+      minLength: 3,
+      source: DATA.arGroupDrop,
+      select: function(event, ui) {
+        $("#zendeskGroup").val(ui.item.label);
+        $("#zendeskGSelect").val(ui.item.value);
+        return false;
+      },
+      change: function(event, ui) {
+        if (_.isNull(ui.item)) {
+          $("#zendeskGroup").val('');
+          $("#zendeskGSelect").val('');
+        } else {
           $("#zendeskGroup").val(ui.item.label);
           $("#zendeskGSelect").val(ui.item.value);
-          return false;
-        },
-        change: function(event, ui) {
-
-          if (_.isNull(ui.item)) {
-            $("#zendeskGroup").val('');
-            $("#zendeskGSelect").val('');
-          } else {
-            $("#zendeskGroup").val(ui.item.label);
-            $("#zendeskGSelect").val(ui.item.value);
-          }
         }
-      });
-    }
+      }
+    });
+  }
+
+  function autocompleteAssignee() {
+    console.log(DATA.arAssignees);
+    // bypass this.form to bind the autocomplete.
+    $('#assigneeName').autocomplete({
+      minLength: 3,
+      source: DATA.arAssignable,
+      select: function(event, ui) {
+        $("#assigneeName").val(ui.item.label);
+        $("#assigneeId").val(ui.item.value);
+        return false;
+      },
+      change: function(event, ui) {
+        if (_.isNull(ui.item)) {
+          $("#assigneeName").val('');
+          $("#assigneeId").val('');
+        } else {
+          $("#assigneeName").val(ui.item.label);
+          $("#assigneeId").val(ui.item.value);
+        }
+      }
+    });
+  }
 
   function getTicketTypes (strSelectedType){
 
@@ -609,13 +635,19 @@ function processTicketFields(intPage) {
   }
 
   function getProjectSearch (intExternalID, intPage) {
+    console.log('intExternalID');
+    console.log(intExternalID);
     var objRequest = {
-        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&page=' + intPage + '&per_page=50&lang=' + DATA.strUserLocale,
+        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&page=' + intPage + '&lang=' + DATA.strUserLocale,
         type:'GET',
         dataType: 'json'
     };
 
+    console.log(objRequest);
+
     client.request(objRequest).then(function(objData) {
+      console.log('get project search');
+      console.log(objData);
       listProjects(objData || {});
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
@@ -653,7 +685,7 @@ function processTicketFields(intPage) {
 
       $('#assigneeName').attr('class', "spinner dotted");
 
-      DATA.assignable = _.map(objData.users, function(objUser) {
+      DATA.arAssignable = _.map(objData.users, function(objUser) {
         return {
           "label": objUser.name,
           "value": objUser.id
@@ -675,28 +707,6 @@ function processTicketFields(intPage) {
       console.error('Could not get ticket form data', error)
     });
     
-  }
-
-  function autocompleteAssignee() {
-    // bypass this.form to bind the autocomplete.
-    $('#assigneeName').autocomplete({
-      minLength: 3,
-      source: assignable,
-      select: function(event, ui) {
-        $("#assigneeName").val(ui.item.label);
-        $("#assigneeId").val(ui.item.value);
-        return false;
-      },
-      change: function(event, ui) {
-        if (_.isNull(ui.item)) {
-          $("#assigneeName").val('');
-          $("#assigneeId").val('');
-        } else {
-          $("#assigneeName").val(ui.item.label);
-          $("#assigneeId").val(ui.item.value);
-        }
-      }
-    }, this);
   }
 
   function createTicketValues() {
@@ -724,7 +734,8 @@ function processTicketFields(intPage) {
           client.invoke('notify', 'Please enter a value between 1 - 100 only', 'error');
 
         } else {
-
+          console.log('intNoOfTickets');
+          console.log(intNoOfTickets);
           for (var i = 0; i < intNoOfTickets; i++) {
             proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
           }
@@ -807,6 +818,7 @@ function processTicketFields(intPage) {
   }
 
   function createTicket(objTicketData) {
+    console.log('create ticket here!');
     var objRequest = {
       url:'/api/v2/tickets.json',
       type:'POST',
@@ -876,6 +888,9 @@ function processTicketFields(intPage) {
           });
 
           $('#app').render('description',{createResult: DATA.arCreateResultsData});
+
+          // resizeApp();
+          client.invoke('resize', { width: '100%', height: 'auto' });
 
           var arCurrentTags = objTicket.ticket.tags;
 
@@ -974,7 +989,8 @@ function processTicketFields(intPage) {
   }
 
   function putExternalID(objTicketData, intTicketUpdateID) {
-
+    console.log('put external id');
+    console.log(objTicketData);
      var objRequest = {
         url: '/api/v2/tickets/' + intTicketUpdateID + '.json',
         type:'PUT',
@@ -990,6 +1006,8 @@ function processTicketFields(intPage) {
   }
 
   function updateList() {
+    // resizeApp();
+    client.invoke('resize', { width: '100%', height: '250px' });
     client.get('ticket').then(function(objTicket) {
       getExternalID(objTicket.ticket.id);
     });
@@ -997,7 +1015,7 @@ function processTicketFields(intPage) {
   }
 
   function switchToBulk() {
-
+    // resizeApp();
     client.invoke('resize', { width: '100%', height: '350px' });
 
     client.get('ticket').then(function(objTicket) {
@@ -1063,7 +1081,7 @@ function processTicketFields(intPage) {
   }
 
   function switchToUpdate() {
-    $('#app').render('updateTickets',{});
+    $('#app').render('updatetickets',{});
   }
 
   function createBulkTickets() {
@@ -1204,6 +1222,20 @@ function processTicketFields(intPage) {
     return true;
   }
 
+  function resizeApp(newHeight) {
+    var height;
+
+    if (newHeight) {
+      height = newHeight;
+    } else {
+      height = $('#app')[0].scrollHeight + 20;
+    }
+
+    console.log(height);
+
+    client.invoke('resize', { width: '100%', height: $(document).height() });
+  };
+
   // EVENTS
 
   $(document).on('click', '.makeproj', function(objData) {
@@ -1258,8 +1290,16 @@ function processTicketFields(intPage) {
     autocompleteRequesterEmail();
   });
 
-    $(document).on('click', '.displayForm', function() {
+  $(document).on('keyup', '#assigneeName', function() {
+    autocompleteAssignee();
+  });
+
+  $(document).on('click', '.displayForm', function() {
     switchToRequester();
+  });
+
+  $(document).on('blur', '#zendeskGroup', function() {
+    assignableAgents($("#zendeskGSelect").val(), 1);
   });
 
 
@@ -1271,7 +1311,9 @@ function processTicketFields(intPage) {
     }
   });
 
-  $(document).tooltip();
+  $(document).tooltip({
+    tooltipClass: "tooltip-styling"
+  });
 
   validateMapping();
 
