@@ -5,7 +5,7 @@
       <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
         <option value="">-</option>
         {{#each ticketForm}}
-          <option value="{{id}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
+          <option value="{{@key}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
         {{/each}}
       </select>
     </div>

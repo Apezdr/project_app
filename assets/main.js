@@ -1,10 +1,16 @@
-resizeApp();
-
+resizeApp(200);
 
 // add template path
 $.handlebars({
     templatePath: './templates',
     templateExtension: 'hbs'
+});
+
+Handlebars.registerHelper('ifCond', function(v1, v2, options) {
+  if(v1 === v2) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
 });
 
 // render default template
@@ -88,8 +94,7 @@ var buildTicketFormList = function(objItem) {
   if(objItem.role !== 'end-user' && _.isUndefined( DATA.arAssignees[objItem.id] )){
 
     DATA.arAssignees[objItem.id] = objItem.name;
-    console.log('arAssignees');
-    console.log(DATA.arAssignees);
+
     //build an array for the ticket submit pages to create dropdown list
     DATA.arAgentDrop.push({
       'label': objItem.name,
@@ -100,8 +105,6 @@ var buildTicketFormList = function(objItem) {
 };
 
 var buildTicketFieldList = function(objItem) {
-  console.log('objItem here');
-  console.log(objItem);
     // get default ticket form ID as necessary
     if (objItem.active && objItem.removable === true) {
       if(_.indexOf(DATA.arTicketFieldList, objItem.id) === -1) {
@@ -208,7 +211,7 @@ function getTicketForms(intPage) {
   client.request(objRequest).then(function(objData) {
 
     processTicketForms(objData);
-    DATA.objTicketFormResponse = objData;
+    // DATA.objTicketFormResponse = objData;
 
   }.bind(this), function(error) {
 
@@ -309,10 +312,10 @@ function getGroupsData(intPage) {
     })
 }
     
-function processTicketFields(intPage) {
+function processTicketFields() {
 
     var objRequest = {
-      url: '/api/v2/ticket_fields.json?lang=' + DATA.strUserLocale + '&page=' + intPage,
+      url: '/api/v2/ticket_fields.json?lang=' + DATA.strUserLocale,
       type:'GET',
       dataType: 'json'
     };
@@ -326,7 +329,7 @@ function processTicketFields(intPage) {
       if (objData.next_page !== null) {
 
         intNextPage = intNextPage + 1;
-        processTicketFields(intNextPage);
+        getTicketFieldsData(intNextPage);
 
       } else {
 
@@ -343,6 +346,7 @@ function processTicketFields(intPage) {
             }
         });
 
+
         DATA.fieldsHTML = $('#custom-fields-row').render('_fields', {
           fields: arDisplayFields
         });
@@ -357,6 +361,7 @@ function processTicketFields(intPage) {
   }
 
   function processTicketFieldsData (){
+
     //grab the custom field div find the input and make an array
     var fieldListArray = $('#custom-fields :input').serializeArray();
     //go through the array of current custom fields.
@@ -379,7 +384,7 @@ function processTicketFields(intPage) {
   function listProjects(objData) {
     var intNextPage = 1;
     DATA.arTicketList = [];
-    console.log('list projects');
+
     _.each(objData.users, buildAgentList, this);
     _.each(objData.groups, buildGroupList, this);
 
@@ -392,21 +397,18 @@ function processTicketFields(intPage) {
       // build ticket list
       _.each(objData.tickets, buildTicketList, this);
 
-      if (objData.next_page !== null) {
-        console.log('objData next_page');
-        console.log(objData);
-        intNextPage = intNextPage + 1;
+      // if (objData.next_page !== null) {
+      //   console.log('objData next_page');
+      //   console.log(objData);
+      //   intNextPage = intNextPage + 1;
 
-        getProjectSearch(objData.tickets[0].external_id, intNextPage);
-      }
+      //   getProjectSearch(objData.tickets[0].external_id, intNextPage);
+      // }
     }
 
     var objProjects = {
       projects: DATA.arTicketList
     }
-
-    console.log('objProjects!');
-    console.log(objProjects);
 
     $('#app').render('project-list', objProjects);
 
@@ -478,7 +480,7 @@ function processTicketFields(intPage) {
       }
       
       var objData = {
-        ticketForm: DATA.objTicketFormResponse.ticket_forms,
+        ticketForm: DATA.objTicketForms,
         currentForm: objTicket.ticket.form.id,
         email: objTicket.ticket.requester.email,
         assigneeName: strAssigneeName,
@@ -489,6 +491,7 @@ function processTicketFields(intPage) {
         desc: objTicket.ticket.description,
         ticketType: getTicketTypes()
       };
+
 
       $('#app').render('requester', objData);
 
@@ -504,13 +507,16 @@ function processTicketFields(intPage) {
         $('#zendeskForm').val(1);
         $('#zendeskForm').parent().hide();
       }
-      $('#zendeskForm').change();
+
+      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
       $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
       if($('#zenType').val() === 'task'){
         $('#dueDate').parent().show();
       }
 
-    }.bind(this));
+    });
   }
 
   function autocompleteRequesterEmail() {
@@ -569,7 +575,7 @@ function processTicketFields(intPage) {
   }
 
   function autocompleteAssignee() {
-    console.log(DATA.arAssignees);
+
     // bypass this.form to bind the autocomplete.
     $('#assigneeName').autocomplete({
       minLength: 3,
@@ -635,19 +641,14 @@ function processTicketFields(intPage) {
   }
 
   function getProjectSearch (intExternalID, intPage) {
-    console.log('intExternalID');
-    console.log(intExternalID);
+
     var objRequest = {
-        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&page=' + intPage + '&lang=' + DATA.strUserLocale,
+        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&lang=' + DATA.strUserLocale,
         type:'GET',
         dataType: 'json'
     };
 
-    console.log(objRequest);
-
     client.request(objRequest).then(function(objData) {
-      console.log('get project search');
-      console.log(objData);
       listProjects(objData || {});
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
@@ -721,46 +722,36 @@ function processTicketFields(intPage) {
       arGroupSelected.push($('#zendeskGSelect').val());
     }
 
-    client.get('ticket.id').then(function(objTicket) {
+    client.get('ticket').then(function(objTicket) {
   
-      var intTicketID = objTicket['ticket.id'];
+      var intTicketID = objTicket.ticket.id;
+  
+      proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
+      
+      var arCurrentTags = objTicket.ticket.tags;
 
-      var intNoOfTickets = parseInt($('#childTicketNo').val());
-      console.log(intNoOfTickets);
-      if (! _.isNaN(intNoOfTickets)) {
-        
-        if (intNoOfTickets < 1 || intNoOfTickets > 100 || _.isNaN(intNoOfTickets)) {
-
-          client.invoke('notify', 'Please enter a value between 1 - 100 only', 'error');
-
-        } else {
-          console.log('intNoOfTickets');
-          console.log(intNoOfTickets);
-          for (var i = 0; i < intNoOfTickets; i++) {
-            proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
-          }
-        }
-      } else {
-        proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList);
-      }
+      putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
+      addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
 
     });
 
   }
 
   function proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList) {
-    console.log('arGroupSelected');
-    console.log(arGroupSelected);
 
     if (! _.isEmpty(arGroupSelected)) {
 
       arGroupSelected.forEach(function(intGroupID) {
-
+          
           var objRootTicket = {};
           objRootTicket.ticket = {};
           objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
           objRootTicket.ticket.subject = $('#userSub').val();
-          objRootTicket.ticket.due_at = $('#dueDate').val();
+
+          if (! _.isUndefined($('due_date').val())) {
+            objRootTicket.ticket.due_at = formatDate($('#dueDate').val());
+          }
+          
           objRootTicket.ticket.type = $('#zenType').val();
           objRootTicket.ticket.priority = $('#zenPri').val();
           objRootTicket.ticket.comment = {};
@@ -805,9 +796,6 @@ function processTicketFields(intPage) {
           if (! isCopyDescription) {
             objRootTicket.ticket.comment.public = false;
           }
-
-          console.log('objRootTicket here');
-          console.log(objRootTicket);
         
           createTicket(objRootTicket);
       });
@@ -818,7 +806,6 @@ function processTicketFields(intPage) {
   }
 
   function createTicket(objTicketData) {
-    console.log('create ticket here!');
     var objRequest = {
       url:'/api/v2/tickets.json',
       type:'POST',
@@ -827,7 +814,7 @@ function processTicketFields(intPage) {
     };
 
     client.request(objRequest).then(function(objData) {
-      processData(objData);
+      processData(objData, "add");
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
     });
@@ -863,38 +850,49 @@ function processTicketFields(intPage) {
       
   }
 
-  function processData(objData) {
+  function processData(objData, strType) {
 
       client.get('ticket').then(function(objTicket) {
 
         var intTicketID = objTicket.ticket.id;
 
         // client.invoke('ticket.tags.add', ['project_parent', 'project_' + intTicketID]);
-        addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
+        // addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
 
         client.metadata().then(function(metadata) {
           client.set('ticket.customField:custom_field_' + metadata.settings.Custom_Field_ID, 'Project-' + intTicketID);
 
         });
 
-        console.log('objdata here');
-        console.log(objData);
-
         if(! _.isUndefined(objData)) {
 
-          DATA.arCreateResultsData.push({
-            'id': objData.ticket.id,
-            'external_id': objData.ticket.external_id
-          });
+          // do not display the same ticket id
+          if (strType == "add" && objData.ticket.id !== intTicketID) {
+            DATA.arCreateResultsData.push({
+              'id': objData.ticket.id,
+              'external_id': objData.ticket.external_id,
+              'type': strType
+            });
+          } else if (strType == "remove") {
+            DATA.arCreateResultsData.push({
+              'id': objData.ticket.id,
+              'external_id': objData.ticket.external_id,
+              'type': strType,
+              'parent_id': intTicketID
+            });
+          }
 
           $('#app').render('description',{createResult: DATA.arCreateResultsData});
+
+          if (strType == "remove") {
+            $('button.child').hide();
+            $('button.displayList').hide();
+            $('button.parent').show();
+          }
 
           // resizeApp();
           client.invoke('resize', { width: '100%', height: 'auto' });
 
-          var arCurrentTags = objTicket.ticket.tags;
-
-          putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
         }
 
       });
@@ -921,7 +919,6 @@ function processTicketFields(intPage) {
   }
 
   function removeTicketTags(arTags, intTicketID) {
-    console.log('removing tags ' + arTags);
     var objRequest = {
       url:'/api/v2/tickets/' + intTicketID + '/tags.json',
       type:'DELETE',
@@ -939,7 +936,8 @@ function processTicketFields(intPage) {
     });
   }
 
-  function putTicketData (arTags, strLinking, strType, objData, strLinkedTicketType) {
+  function putTicketData (arTags, strLinking, strType, objData) {
+
       var arTicketTags = arTags;
 
       var isParent = (_.indexOf(arTicketTags, 'project_parent') !== -1 || strLinking === 'project_parent');
@@ -982,15 +980,14 @@ function processTicketFields(intPage) {
 
           objUpdateTicket.ticket.tags = arTicketTags;
 
-          putExternalID(objUpdateTicket, intTicketUpdateID);
+          putExternalID(objUpdateTicket, intTicketUpdateID, strType);
          
         });
       });
   }
 
-  function putExternalID(objTicketData, intTicketUpdateID) {
-    console.log('put external id');
-    console.log(objTicketData);
+  function putExternalID(objTicketData, intTicketUpdateID, strType) {
+
      var objRequest = {
         url: '/api/v2/tickets/' + intTicketUpdateID + '.json',
         type:'PUT',
@@ -999,7 +996,7 @@ function processTicketFields(intPage) {
     };
 
     client.request(objRequest).then(function(objData) {
-        processData();
+        processData(objData, strType);
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
     });
@@ -1049,7 +1046,7 @@ function processTicketFields(intPage) {
         }
 
         $('#app').render('multicreate',{
-          ticketForm: DATA.objTicketFormResponse.ticket_forms,
+          ticketForm: DATA.objTicketForms,
           currentForm: intCurrentFormID,
           email: objTicket.ticket.requester.email,
           assigneeName: strAssigneeName,
@@ -1069,7 +1066,7 @@ function processTicketFields(intPage) {
           $('#zendeskForm').val(1);
           $('#zendeskForm').parent().hide();
         }
-        $('#zendeskForm').change();
+        $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).change();
         $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
         if($('#zenType').val() === 'task'){
           $('#dueDate').parent().show();
@@ -1082,6 +1079,7 @@ function processTicketFields(intPage) {
 
   function switchToUpdate() {
     $('#app').render('updatetickets',{});
+    resizeApp(220);
   }
 
   function createBulkTickets() {
@@ -1091,17 +1089,13 @@ function processTicketFields(intPage) {
   function updateTickets() {
      
     var arList = $('#listofIDs').val().split(/,|\s/);
-    var strLinkedTicketType = $('#linkedTicketType').val();
 
     client.get('ticket').then(function(objTicket) {
        //update the the current ticket
       var arCurrentTags = objTicket.ticket.tags;
 
-      if (strLinkedTicketType == "child_ticket") {
-        putTicketData(arCurrentTags, 'project_child', 'add', objTicket.ticket.id);
-      } else {
-        putTicketData(arCurrentTags, 'project_parent', 'add', objTicket.ticket.id);
-      }
+      
+      putTicketData(arCurrentTags, 'project_parent', 'add', objTicket.ticket.id);
       
       //get the list supplied and update the ticket.
       arList.forEach(function(intTicketID) {
@@ -1122,13 +1116,7 @@ function processTicketFields(intPage) {
           }
 
           if ((objData.ticket.status !== 'closed') && (_.indexOf(objData.ticket.tags, 'project_child') === -1)) {
-           
-            if (strLinkedTicketType == "child_ticket") {
-              putTicketData(objData.ticket.tags, "project_parent", 'add', objData);
-            } else {
-              putTicketData(objData.ticket.tags, "project_child", 'add', objData);
-            }
-            
+              putTicketData(objData.ticket.tags, "project_child", 'add', objData);  
           } else if (objData.ticket.status === 'closed') {
             client.invoke('notify', objData.ticket.id + ' is closed', 'error');
           } else if (_.indexOf(objData.ticket.tags, 'project_child') !== -1) {
@@ -1151,7 +1139,7 @@ function processTicketFields(intPage) {
   }
 
   function getTicketFieldsData (page){
-    processTicketFields();
+    processTicketFields(page);
   }
 
   function removeFromProject() {
@@ -1226,15 +1214,35 @@ function processTicketFields(intPage) {
     var height;
 
     if (newHeight) {
-      height = newHeight;
+      height = newHeight + 'px';
     } else {
-      height = $('#app')[0].scrollHeight + 20;
+      height = $(document).height();
     }
 
     console.log(height);
 
-    client.invoke('resize', { width: '100%', height: $(document).height() });
-  };
+    client.invoke('resize', { width: '100%', height: height });
+  }
+
+  function showDate() {
+    if($('#zenType').val() === 'task'){
+      $('#dueDate').parent().show();
+    } else {
+      $('#dueDate').parent().hide();
+    }
+  }
+
+  function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
 
   // EVENTS
 
@@ -1268,6 +1276,7 @@ function processTicketFields(intPage) {
   });
 
   $(document).on('change', '#zendeskForm', function() {
+    console.log('zendesk form on change');
     formSelected();
   });
 
@@ -1302,6 +1311,12 @@ function processTicketFields(intPage) {
     assignableAgents($("#zendeskGSelect").val(), 1);
   });
 
+  $(document).on('change', '#zenType', function() {
+    showDate();
+    $( "#dueDate" ).datepicker();
+    $( "#dueDate" ).datepicker( "option", "dateFormat", 'MM d, yy' );
+  });
+
 
   $(document).on('change', '#copyDescription', function() {
     if ( $(this).is(':checked')) {
@@ -1314,6 +1329,7 @@ function processTicketFields(intPage) {
   $(document).tooltip({
     tooltipClass: "tooltip-styling"
   });
+
 
   validateMapping();
 

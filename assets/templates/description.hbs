@@ -1,4 +1,11 @@
 {{#createResult}}
-  <div>Ticket <a href="#" data-id="{{id}}" class="open-ticket-tab"><b>#{{id}}</b></a> was created with {{external_id}}</div>
-  <br>
+	{{#ifCond type "add"}}
+	  <div>Ticket <a href="#" data-id="{{id}}" class="open-ticket-tab"><b>#{{id}}</b></a> was created with {{external_id}}</div>
+	  <br>
+	{{/ifCond}}
+
+	{{#ifCond type "remove"}}
+	  <div>Ticket <a href="#" data-id="{{id}}" class="open-ticket-tab"><b>#{{id}}</b></a> was removed</div>
+	  <br>
+	{{/ifCond}}
 {{/createResult}}

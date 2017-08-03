@@ -6,7 +6,7 @@
         <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
         <option value="">-</option>
         {{#each ticketForm}}
-          <option value="{{id}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
+          <option value="{{@key}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
         {{/each}}
       </select>
 			</div>
@@ -65,11 +65,6 @@
 	<div class="control-group">
 		<label for="ticketDesc">Description</label>
 		<textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please Describe the issue">Child of Ticket #{{intTicketID}}</textarea>
-	</div>
-
-	<div class="control-group">
-		<label for="no of child tickets">No. of Child Ticket</label>
-		<input required type="text" name="childTicketNo" id="childTicketNo" placeholder="Enter no. of tickets">
 	</div>
 
 	<div class="control-group">

@@ -237,3 +237,6 @@ a:hover {
   box-shadow: none;
 }
 
+input[type="text"], textarea, select {
+  width: 100% !important;
+}
