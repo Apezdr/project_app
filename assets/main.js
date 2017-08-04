@@ -411,6 +411,7 @@ function processTicketFields() {
     }
 
     $('#app').render('project-list', objProjects);
+    resizeApp(300);
 
     parentSolve();
 
@@ -508,10 +509,13 @@ function processTicketFields() {
         $('#zendeskForm').parent().hide();
       }
 
-      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
-      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
-      $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+      setTimeout(function(){ 
+          $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+       }, 100);
+    
+
       $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+      
       if($('#zenType').val() === 'task'){
         $('#dueDate').parent().show();
       }
@@ -1003,8 +1007,6 @@ function processTicketFields() {
   }
 
   function updateList() {
-    // resizeApp();
-    client.invoke('resize', { width: '100%', height: '250px' });
     client.get('ticket').then(function(objTicket) {
       getExternalID(objTicket.ticket.id);
     });
