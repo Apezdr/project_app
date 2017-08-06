@@ -47,8 +47,7 @@ var DATA = {
   isPublic: true,
   strTicketDescription: '',
   strNewTicketDescription: '',
-  intTicketID: 0,
-  objCustomFieldMapping: {}
+  intTicketID: 0
 };
 
 var buildGroupList = function(objItem) {
@@ -784,14 +783,6 @@ function processTicketFields() {
           arFieldList.forEach(function(objField) {
             objRootTicket.ticket.custom_fields[objField.name] = objField.value;
           }); 
-           var obj = {}
-          $.each(DATA.objCustomFieldMapping, function(key, value) {
-            // need to change the value?
-            if (value != "=") { 
-              objRootTicket.ticket.custom_fields[key] = value;
-            }
-            
-          });
 
           duplicateCustomFieldsValues(objRootTicket.ticket);
 
@@ -1182,26 +1173,6 @@ function processTicketFields() {
     });
   }
 
-  function validateMapping() {
-
-    client.metadata().then(function(metadata) {
-      var objCustomFieldMapping = metadata.settings.custom_field_mapping;
-
-      if (! _.isUndefined(objCustomFieldMapping)) {
-        
-        if (validateJSON(objCustomFieldMapping)) {
-
-          DATA.objCustomFieldMapping = JSON.parse(objCustomFieldMapping);
-         
-        } else {
-          client.invoke('notify', 'Custom Field Mapping is not a valid JSON', 'error');
-        }
-      }
-      
-
-    });
-  }
-
   function validateJSON(objJSON) {
     try {
       JSON.parse(objJSON);
@@ -1331,9 +1302,6 @@ function processTicketFields() {
   $(document).tooltip({
     tooltipClass: "tooltip-styling"
   });
-
-
-  validateMapping();
 
   getTicketFormData();
 
