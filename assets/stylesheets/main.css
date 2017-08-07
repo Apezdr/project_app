@@ -237,6 +237,30 @@ a:hover {
   box-shadow: none;
 }
 
-input[type="text"], textarea, select {
+input[type="text"], input[type="email"], textarea, select {
   width: 100% !important;
+}
+
+.pager {
+  padding-left: 0;
+  margin: 20px 0;
+  text-align: center;
+  list-style: none;
+}
+
+.pager li {
+  display: inline;
+}
+
+.pager li>a, .pager li>span {
+  display: inline-block;
+  padding: 5px 14px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+}
+
+a {
+  color: #337ab7;
+  text-decoration: none;
 }

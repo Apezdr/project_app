@@ -1,4 +1,4 @@
-resizeApp(200);
+resizeApp(250);
 
 // add template path
 $.handlebars({
@@ -47,7 +47,12 @@ var DATA = {
   isPublic: true,
   strTicketDescription: '',
   strNewTicketDescription: '',
-  intTicketID: 0
+  intTicketID: 0,
+  next_page: 0,
+  prev_page: 0,
+  isPrevPage: true,
+  isNextPage: true,
+  isProceed: true
 };
 
 var buildGroupList = function(objItem) {
@@ -396,32 +401,46 @@ function processTicketFields() {
       // build ticket list
       _.each(objData.tickets, buildTicketList, this);
 
-      // if (objData.next_page !== null) {
-      //   console.log('objData next_page');
-      //   console.log(objData);
-      //   intNextPage = intNextPage + 1;
+      if (objData.next_page !== null) {
 
-      //   getProjectSearch(objData.tickets[0].external_id, intNextPage);
-      // }
+        DATA.next_page = getUrlParameter("page", objData.next_page);
+        DATA.external_id = objData.tickets[0].external_id;
+        DATA.isNextPage = true;
+      
+      } else {
+        DATA.isNextPage = false;
+      }
+
+      if (objData.previous_page !== null) {
+
+        DATA.prev_page = getUrlParameter("page", objData.previous_page);
+        DATA.external_id = objData.tickets[0].external_id;
+        DATA.isPrevPage = true;
+
+      } else {
+        DATA.isPrevPage = false;
+      }
+
     }
 
     var objProjects = {
-      projects: DATA.arTicketList
+      projects: DATA.arTicketList,
+      isNextPage: DATA.isNextPage,
+      isPrevPage: DATA.isPrevPage
     }
 
     $('#app').render('project-list', objProjects);
-    resizeApp(300);
 
     parentSolve();
-
-    $('button.child').hide();
-    $('button.displayList').hide();
-    $('button.parent').show();
 
     client.get('ticket.tags').then(function(objTicket) {
       if (_.indexOf(objTicket['ticket.tags'], 'project_child') !== -1) {
         $('button.parent').hide();
         $('button.child').show();
+      } else {
+        $('button.child').hide();
+        $('button.displayList').hide();
+        $('button.parent').show();
       }
     }.bind(this));
 
@@ -449,8 +468,7 @@ function processTicketFields() {
     
 
   function switchToRequester () {
-    // resizeApp();
-    client.invoke('resize', { width: '100%', height: '350px' });
+    resizeApp(350);
     var strAssigneeID, strAssigneeName, strGroupName, strGroupID;
     
     var arTicketType = getTicketTypes(); 
@@ -643,10 +661,9 @@ function processTicketFields() {
       });
   }
 
-  function getProjectSearch (intExternalID, intPage) {
-
+  function getProjectSearch (intExternalID, intPage, strURL) {
     var objRequest = {
-        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&lang=' + DATA.strUserLocale,
+        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&per_page=50&lang=' + DATA.strUserLocale + '&page=' + intPage,
         type:'GET',
         dataType: 'json'
     };
@@ -733,8 +750,11 @@ function processTicketFields() {
       
       var arCurrentTags = objTicket.ticket.tags;
 
-      putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
-      addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
+      if (DATA.isProceed) {
+        putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
+        addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
+      }
+      
 
     });
 
@@ -743,7 +763,7 @@ function processTicketFields() {
   function proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList) {
 
     if (! _.isEmpty(arGroupSelected)) {
-
+      DATA.isProceed = true;
       arGroupSelected.forEach(function(intGroupID) {
           
           var objRootTicket = {};
@@ -795,7 +815,8 @@ function processTicketFields() {
           createTicket(objRootTicket);
       });
     } else {
-       client.invoke('notify', 'Please select a group', 'error');
+        client.invoke('notify', 'Please select a group', 'error');
+        DATA.isProceed = false;
     }
     
   }
@@ -1005,8 +1026,7 @@ function processTicketFields() {
   }
 
   function switchToBulk() {
-    // resizeApp();
-    client.invoke('resize', { width: '100%', height: '350px' });
+    resizeApp(350);
 
     client.get('ticket').then(function(objTicket) {
         
@@ -1187,14 +1207,12 @@ function processTicketFields() {
     var height;
 
     if (newHeight) {
-      height = newHeight + 'px';
+      height = newHeight;
     } else {
-      height = $(document).height();
+      height = $('#app')[0].scrollHeight + 20;
     }
 
-    console.log(height);
-
-    client.invoke('resize', { width: '100%', height: height });
+    client.invoke('resize', { width: '100%', height: height + 'px' });
   }
 
   function showDate() {
@@ -1215,6 +1233,21 @@ function processTicketFields() {
     if (day.length < 2) day = '0' + day;
 
     return [year, month, day].join('-');
+  }
+
+  function getUrlParameter(sParam, strURL) {
+    var sPageURL = decodeURIComponent(strURL.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
   }
 
   // EVENTS
@@ -1282,6 +1315,16 @@ function processTicketFields() {
 
   $(document).on('blur', '#zendeskGroup', function() {
     assignableAgents($("#zendeskGSelect").val(), 1);
+  });
+
+  $(document).on('click', '#prev-page', function() {
+    getProjectSearch(DATA.external_id, DATA.prev_page);
+    resizeApp();
+  });
+
+  $(document).on('click', '#next-page', function() {
+    getProjectSearch(DATA.external_id, DATA.next_page);
+    resizeApp();
   });
 
   $(document).on('change', '#zenType', function() {

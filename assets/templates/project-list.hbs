@@ -1,4 +1,14 @@
 {{#if projects.length}}
+  <ul class="pager">
+    <div class="pager-wrapper">
+      {{#if isPrevPage}}
+        <li><a href="#" id="prev-page">Prev</a></li>
+      {{/if}}
+      {{#if isNextPage}}
+        <li><a href="#" id="next-page">Next</a></li>
+      {{/if}}
+    </div>
+  </ul>
   <div>
     {{#each projects}}
       {{#selected}}
