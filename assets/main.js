@@ -476,6 +476,7 @@ function processTicketFields() {
     client.get('ticket').then(function(objTicket) {
       
       var strNewSubject = objTicket.ticket.subject;
+      var intTicketID = objTicket.ticket.id;
 
       if (DATA.prependSubject) {
         strNewSubject = 'Project-' + intTicketID + ' ' + strNewSubject;
@@ -1209,7 +1210,7 @@ function processTicketFields() {
     if (newHeight) {
       height = newHeight;
     } else {
-      height = $('#app')[0].scrollHeight + 20;
+      height = $('#app')[0].scrollHeight + 50;
     }
 
     client.invoke('resize', { width: '100%', height: height + 'px' });
