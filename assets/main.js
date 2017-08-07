@@ -356,7 +356,10 @@ function processTicketFields() {
         });
 
         $('#zendeskForm').closest('.control-group').after(DATA.fieldsHTML);
-        processTicketFieldsData();
+        
+        setTimeout(function(){ 
+          processTicketFieldsData();
+        }, 100);
       }
 
     }.bind(this), function(error) {
