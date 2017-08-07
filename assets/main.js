@@ -1,10 +1,5 @@
-// resizeApp(250);
+resizeApp(250);
 
-client.on('resize', function(evt){console.dir(evt)});
-
- $(window).resize(function () {
-    client.invoke('resize', { width: '100%', height: $(document).height()});
-  })
 // add template path
 $.handlebars({
     templatePath: './templates',
