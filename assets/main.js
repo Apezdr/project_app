@@ -1,5 +1,10 @@
-resizeApp(250);
+// resizeApp(250);
 
+client.on('resize', function(evt){console.dir(evt)});
+
+ $(window).resize(function () {
+    client.invoke('resize', { width: '100%', height: $(document).height()});
+  })
 // add template path
 $.handlebars({
     templatePath: './templates',
@@ -1080,7 +1085,11 @@ function processTicketFields() {
           $('#zendeskForm').val(1);
           $('#zendeskForm').parent().hide();
         }
-        $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).change();
+
+        setTimeout(function(){ 
+          $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+        }, 100);
+
         $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
         if($('#zenType').val() === 'task'){
           $('#dueDate').parent().show();
