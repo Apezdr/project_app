@@ -2,10 +2,10 @@
   <ul class="pager">
     <div class="pager-wrapper">
       {{#if isPrevPage}}
-        <li><a href="#" id="prev-page">Prev</a></li>
+        <li><a href="#" class="prev-page">Prev</a></li>
       {{/if}}
       {{#if isNextPage}}
-        <li><a href="#" id="next-page">Next</a></li>
+        <li><a href="#" class="next-page">Next</a></li>
       {{/if}}
     </div>
   </ul>
@@ -38,6 +38,16 @@
       {{/selected}}
     {{/each}}
   </div>
+  <ul class="pager">
+    <div class="pager-wrapper">
+      {{#if isPrevPage}}
+        <li><a href="#" class="prev-page">Prev</a></li>
+      {{/if}}
+      {{#if isNextPage}}
+        <li><a href="#" class="next-page">Next</a></li>
+      {{/if}}
+    </div>
+  </ul>
 {{else}}
   <p>Not currently in a Project</p>
 {{/if}}

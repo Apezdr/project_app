@@ -1,5 +1,3 @@
-resizeApp(250);
-
 // add template path
 $.handlebars({
     templatePath: './templates',
@@ -15,6 +13,8 @@ Handlebars.registerHelper('ifCond', function(v1, v2, options) {
 
 // render default template
 $('#app').render('noproject',{});
+
+resizeApp();
 
 // global variable
 var DATA = {
@@ -433,7 +433,11 @@ function processTicketFields() {
     }
 
     $('#app').render('project-list', objProjects);
-
+    
+    setTimeout(function(){ 
+      resizeApp();
+    }, 100);
+     
     parentSolve();
 
     client.get('ticket.tags').then(function(objTicket) {
@@ -471,7 +475,6 @@ function processTicketFields() {
     
 
   function switchToRequester () {
-    resizeApp(350);
     var strAssigneeID, strAssigneeName, strGroupName, strGroupID;
     
     var arTicketType = getTicketTypes(); 
@@ -531,10 +534,13 @@ function processTicketFields() {
       }
 
       setTimeout(function(){ 
-          $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
-       }, 100);
-    
+        $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
+      }, 100);
 
+      setTimeout(function(){ 
+        resizeApp();
+      }, 500);
+    
       $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
       
       if($('#zenType').val() === 'task'){
@@ -1030,8 +1036,6 @@ function processTicketFields() {
   }
 
   function switchToBulk() {
-    resizeApp(350);
-
     client.get('ticket').then(function(objTicket) {
         
       var strNewSubject = objTicket.ticket.subject;
@@ -1087,6 +1091,10 @@ function processTicketFields() {
         setTimeout(function(){ 
           $('#zendeskForm').val($('#zendeskForm').find(":selected").val()).trigger('change');
         }, 100);
+
+        setTimeout(function(){ 
+          resizeApp();
+        }, 500);
 
         $('#dueDate').val(DATA.objCurrentTicket.ticket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
         if($('#zenType').val() === 'task'){
@@ -1260,101 +1268,103 @@ function processTicketFields() {
 
   // EVENTS
 
-  $(document).on('click', '.makeproj', function(objData) {
-    listProjects(objData);
+  $(function() {
+    $(document).on('click', '.makeproj', function(objData) {
+      listProjects(objData);
+    });
+
+    
+    $(document).on('click', '.submitSpoke', function() {
+      createTicketValues();
+    });
+
+    $(document).on('click', '.displayList', function() {
+      updateList();
+    });
+
+    $(document).on('click', '.displayMultiCreate', function() {
+      switchToBulk();
+    });
+
+    $(document).on('click', '.displayUpdate', function() {
+      switchToUpdate();
+    });
+
+    $(document).on('click', '.submitBulk', function() {
+      createBulkTickets();
+    });
+
+    $(document).on('click', '.updateticket', function() {
+      updateTickets();
+    });
+
+    $(document).on('change', '#zendeskForm', function() {
+      formSelected();
+    });
+
+    $(document).on('click', '.removeTicket', function() {
+      removeFromProject();
+    });
+
+    $(document).on('click', '.open-ticket-tab', function() {
+      // get ticket id
+      var intTicketID = $(this).data('id');
+      // open new ticket tab
+      client.invoke('routeTo', 'ticket', intTicketID);
+    });
+
+    $(document).on('keyup', '#zendeskGroup', function() {
+      autocompleteGroup();
+    });
+
+    $(document).on('keyup', '#userEmail', function() {
+      autocompleteRequesterEmail();
+    });
+
+    $(document).on('keyup', '#assigneeName', function() {
+      autocompleteAssignee();
+    });
+
+    $(document).on('click', '.displayForm', function() {
+      switchToRequester();
+    });
+
+    $(document).on('blur', '#zendeskGroup', function() {
+      assignableAgents($("#zendeskGSelect").val(), 1);
+    });
+
+    $(document).on('click', '.prev-page', function() {
+      getProjectSearch(DATA.external_id, DATA.prev_page);
+      resizeApp();
+    });
+
+    $(document).on('click', '.next-page', function() {
+      getProjectSearch(DATA.external_id, DATA.next_page);
+      resizeApp();
+    });
+
+    $(document).on('change', '#zenType', function() {
+      showDate();
+      $( "#dueDate" ).datepicker();
+      $( "#dueDate" ).datepicker( "option", "dateFormat", 'MM d, yy' );
+    });
+
+
+    $(document).on('change', '#copyDescription', function() {
+      if ( $(this).is(':checked')) {
+        $('#ticketDesc').val(DATA.strTicketDescription);
+      } else {
+        $('#ticketDesc').val("Child of Ticket #" + DATA.intTicketID);
+      }
+    });
+
+    $(document).tooltip({
+      tooltipClass: "tooltip-styling"
+    });
+
+    getTicketFormData();
   });
 
-  
-  $(document).on('click', '.submitSpoke', function() {
-    createTicketValues();
-  });
-
-  $(document).on('click', '.displayList', function() {
-    updateList();
-  });
-
-  $(document).on('click', '.displayMultiCreate', function() {
-    switchToBulk();
-  });
-
-  $(document).on('click', '.displayUpdate', function() {
-    switchToUpdate();
-  });
-
-  $(document).on('click', '.submitBulk', function() {
-    createBulkTickets();
-  });
-
-  $(document).on('click', '.updateticket', function() {
-    updateTickets();
-  });
-
-  $(document).on('change', '#zendeskForm', function() {
-    console.log('zendesk form on change');
-    formSelected();
-  });
-
-  $(document).on('click', '.removeTicket', function() {
-    removeFromProject();
-  });
-
-  $(document).on('click', '.open-ticket-tab', function() {
-    // get ticket id
-    var intTicketID = $(this).data('id');
-    // open new ticket tab
-    client.invoke('routeTo', 'ticket', intTicketID);
-  });
-
-  $(document).on('keyup', '#zendeskGroup', function() {
-    autocompleteGroup();
-  });
-
-  $(document).on('keyup', '#userEmail', function() {
-    autocompleteRequesterEmail();
-  });
-
-  $(document).on('keyup', '#assigneeName', function() {
-    autocompleteAssignee();
-  });
-
-  $(document).on('click', '.displayForm', function() {
-    switchToRequester();
-  });
-
-  $(document).on('blur', '#zendeskGroup', function() {
-    assignableAgents($("#zendeskGSelect").val(), 1);
-  });
-
-  $(document).on('click', '#prev-page', function() {
-    getProjectSearch(DATA.external_id, DATA.prev_page);
-    resizeApp();
-  });
-
-  $(document).on('click', '#next-page', function() {
-    getProjectSearch(DATA.external_id, DATA.next_page);
-    resizeApp();
-  });
-
-  $(document).on('change', '#zenType', function() {
-    showDate();
-    $( "#dueDate" ).datepicker();
-    $( "#dueDate" ).datepicker( "option", "dateFormat", 'MM d, yy' );
-  });
-
-
-  $(document).on('change', '#copyDescription', function() {
-    if ( $(this).is(':checked')) {
-      $('#ticketDesc').val(DATA.strTicketDescription);
-    } else {
-      $('#ticketDesc').val("Child of Ticket #" + DATA.intTicketID);
-    }
-  });
-
-  $(document).tooltip({
-    tooltipClass: "tooltip-styling"
-  });
-
-  getTicketFormData();
 
 
 
