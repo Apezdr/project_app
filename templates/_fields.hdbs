@@ -3,25 +3,25 @@
   <div class="control-group">
     <label for="{{id}}">{{title}}</label>
     {{#if text}}
-      <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}"/>
+      <input type="{{type}}" name="{{id}}" id="{{id}}" style="width: 196px" style="width: 196px;" placeholder="{{raw_description}}"/>
     {{else}}
     {{#if textarea}}
-      <textarea required="required" rows="5" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}"></textarea>
+      <textarea required="required" rows="5" name="{{id}}" id="{{id}}" style="width: 196px" placeholder="{{raw_description}}"></textarea>
     {{else}}
     {{#if checkbox}}
       <input id="{{id}}" name="{{id}}" value=true type="checkbox">
     {{else}}
     {{#if date}}
-      <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}"/>
+      <input type="{{type}}" name="{{id}}" id="{{id}}" style="width: 196px" placeholder="{{raw_description}}"/>
     {{else}}
     {{#if integer}}
-      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
+      <input type="text" name="{{id}}" id="{{id}}" style="width: 196px" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
     {{else}}
     {{#if decimal}}
-      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
+      <input type="text" name="{{id}}" id="{{id}}" style="width: 196px" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
     {{else}}
     {{#if regexp}}
-      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
+      <input type="text" name="{{id}}" id="{{id}}" style="width: 196px" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}"/>
     {{else}}
     {{#if tagger}}
       <select id="{{id}}" required name="{{id}}"  style="width: auto;" size="1">

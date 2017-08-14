@@ -1,0 +1,3 @@
+<div class="centered">
+  <button class="makeproj ember-view btn">{{t "user.btnCurrComm"}}</button>
+</div>

@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "Problem App",
+    "description": "Crear Entradas para niños que todos acoplamiento de nuevo a un boleto de los padres.",
+    "parameters" : {
+      "Custom_Field_ID" : {
+        "label": "El campo ID de encargo",
+        "helpText": "Puede encontrar el ID de campos personalizados en la página de edición de campo de entradas"
+      },
+      "prependSubject": {
+        "label": "Anteponer línea de asuntoe",
+        "helpText": "Anteponer la línea de asunto de los billetes de los niños con el ID de proyecto"
+      },
+      "appendSubject": {
+        "label": "Anexar línea de asunto",
+        "helpText": "Anexar el la línea de asunto de los billetes de los niños con el ID de proyecto"
+      },
+      "settingsMap" : {
+        "label": "asignaciones de plantilla predefinida",
+        "helpText": "Ajustes para los tipos de boletos para establecer grupos de mayor crea billete. Tiene que ser en un formato JSON"
+      },
+      "prefillAssignee" : {
+        "label": "cesionario de prellenado y de grupo",
+        "helpText": "Rellenar previamente los campos cesionario y de grupo en el formulario de creación, tomados de la entrada actual."
+      },
+      "defaultTicketType" : {
+        "label": "Tipo de entradas por defecto",
+        "helpText": "En lugar de hacerse cargo del tipo de entrada del billete actual, utilice este tipo de forma predeterminada. Vacío (para asumir el control), o uno de: pregunta, incidentes, problemas, o tarea."
+      },
+      "defaultTicketPriority" : {
+        "label": "prioridad de entradas por defecto",
+        "helpText": "En lugar de hacerse cargo de la prioridad billete del vuelo actual, utilice esta prioridad por defecto. Vacío (para asumir el control), o uno de: bajo, normal, alto, urgente."
+      },
+      "customFieldIdsToCopy" : {
+        "label": "Copiar valores de campos personalizados",
+        "helpText": "(Opcional) copiar los valores de los campos personalizados con estas Identificación (s) a las nuevas entradas). Separado por comas."
+      }
+    }
+  },
+  "title":"Consultas a Corresponsables",
+  "user": {
+    "btnCurrComm": "Crear Proyecto",
+    "btnMakeSingle":"Crear Ticket",
+    "btnProList": "Listado de Tickets",
+    "btnMakeBulk": "Crear Tickets Masivos",
+    "btnAddExist": "Agregar Existente",
+    "btnRemoveFrom": "Retirar Tickets al Proyecto"
+  },
+  "form":{
+    "tableParent":"Ticket Padre",
+    "tableChildren": "Ticket Hijo",
+    "tablePri": "Prioridad",
+    "tableGroup":"Grupo",
+    "tableType":"Tipo",
+    "tableAssign": "Agente Asignado",
+    "ticket":"Ticket",
+    "wasCreated":"fue creado con",
+    "addTicketno":"Introduzca una lista de identificadores de billetes separados por comas",
+    "listOfTicket": "Lista de ID de las entradas",
+    "addTicket":"Agregar Tickets al Proyecto",
+    "ticketId":"Id de Tickets",
+    "ticketForm": "Formulario",
+    "requester": "Corresponsable",
+    "requesterName": "Nombre Corresponsable",
+    "assignName": "Agente Asignado",
+    "group": "Grupo",
+    "groups": "Grupos",
+    "ticketType": "Tipo",
+    "dueDate":"fecha de vencimiento",
+    "tickPri": "Prioridad",
+    "subject":"Asunto",
+    "subjPlace":"Introduzca un asunto",
+    "description":"Descripción",
+    "descPlace": "Describe el problema",
+    "btnCreateSigle": "Crear Ticket Hijo",
+    "btnCreateBulk":"Crear Tickets Hijo"
+    },
+  "none": "No encuentra actualmente en un proyecto",
+  "status":{
+    "new": "Nuevo",
+    "open": "Abierto",
+    "pending": "Pendiente",
+    "hold": "En espera",
+    "solved": "Resuelto",
+    "closed": "Cerrado"
+  },
+  "priority":{
+    "low": "Baja",
+    "normal": "Normal",
+    "high": "Alta",
+    "urgent": "Urgente"
+  },
+  "type":{
+    "question":"Pregunta",
+    "incident":"Incidente",
+    "problem":"Problema",
+    "task":"Tarea"
+  }
+}

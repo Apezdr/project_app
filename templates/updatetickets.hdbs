@@ -1,0 +1,12 @@
+<div class="row-fluid">
+	<div class="well span12">
+		<div class="control-group _tooltip" data-title="{{t "form.addTicketno"}}">
+			<label for="listofIDs">{{t "form.ticketId"}}</label>
+			<input required placeholder="{{t "form.listOfTicket"}}" type="text" name="listofIDs" id="listofIDs" style="width: 196px" value=""/>
+		</div>
+
+		<div class="control-group">
+			<button class='updateticket ember-view btn btn-large'>{{t "form.addTicket"}}</button>
+		</div>
+	</div>
+</div>
