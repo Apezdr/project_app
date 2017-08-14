@@ -1,0 +1,14 @@
+<header>
+  <span class="logo"/>
+  <h3>{{t "title"}}</h3>
+</header>
+
+<div class="navigation-buttons centered">
+	<button class='displayList ember-view btn'>{{t "user.btnProList"}}</button>
+	<button class='parent displayForm ember-view btn'>{{t "user.btnMakeSingle"}}</button>
+	<button class='parent displayMultiCreate ember-view btn'>{{t "user.btnMakeBulk"}}</button>
+	<button class='parent displayUpdate ember-view btn'>{{t "user.btnAddExist"}}</button>
+  <button class='child removeTicket ember-view btn'>{{t "user.btnRemoveFrom"}}</button>
+</div>
+
+<section data-main />

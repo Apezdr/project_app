@@ -1,6 +1,0 @@
-# ignore OSX data store files
-.DS_Store
-#
-# ignore zip files
- *.zip
-tmp/

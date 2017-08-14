@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "Consulta Corresponsável",
+    "description": "Crear Entradas para niños que todos acoplamiento de nuevo a un boleto de los padres.",
+    "parameters" : {
+      "Custom_Field_ID" : {
+        "label": "Personalizado Campo ID",
+        "helpText": "Você pode encontrar o ID de campo personalizado na página de edição de campo bilhete"
+      },
+      "prependSubject": {
+        "label": "Linha de assunto Prepend",
+        "helpText": "Preceder a linha de assunto dos bilhetes crianças com o ID de projeto"
+      },
+      "appendSubject": {
+        "label": "Anexar linha de assunto",
+        "helpText": "Anexar a linha de assunto dos bilhetes crianças com o ID de projeto"
+      },
+      "settingsMap" : {
+        "label": "mapeamentos de modelo predefinido",
+        "helpText": "Definições para tipos de bilhetes para definir grupos para o bilhete em massa cria. Ele precisa estar em um formato JSON"
+      },
+      "prefillAssignee" : {
+        "label": "cessionário Prefill e grupo",
+        "helpText": "Prefill os campos cessionários e de grupo, sob a forma de criação, assumiu do ticket atual."
+      },
+      "defaultTicketType" : {
+        "label": "tipo de bilhete padrão",
+        "helpText": "Em vez de tomar sobre o tipo de bilhete do bilhete atual, use este tipo por padrão. Empty (assumir), ou um dos seguintes: pergunta, incidentes, problemas, ou tarefa."
+      },
+      "defaultTicketPriority" : {
+        "label": "prioridade bilhete padrão",
+        "helpText": "Em vez de assumir a prioridade bilhete do bilhete atual, use esta prioridade por padrão. Empty (assumir), ou um dos: baixo, normal, alto, urgente."
+      },
+      "customFieldIdsToCopy" : {
+        "label": "valores de cópia de campos personalizados",
+        "helpText": "(Opcionalmente) copiar os valores de campos personalizados com estes ID (s) para o novo bilhete (s). Separados por vírgulas."
+      }
+    }
+  },
+  "title":"Consulta Corresponsável",
+  "user": {
+    "btnCurrComm": "Criação Ticket-Filho",
+    "btnMakeSingle":"Criar Ticket Filho",
+    "btnProList": "Resumo Tickets Pai-Filho",
+    "btnMakeBulk": "Criar Múltiplos Tickets Filhos",
+    "btnAddExist": "Associar a um ticket pai",
+    "btnRemoveFrom": "Remove ticket from project"
+  },
+  "form":{
+    "tableParent":"Pai",
+    "tableChildren": "Filho",
+    "tablePri": "Prioridade",
+    "tableGroup":"Grupo Responsável",
+    "tableType":"Tipo",
+    "tableAssign": "Agente Responsável",
+    "ticket":"Ticket",
+    "wasCreated":"foi criado com",
+    "addTicketno":"Digite uma lista de ID de ticket está separados por vírgulas",
+    "listOfTicket": "Lista de ID do ticket",
+    "addTicket":"Associar tickets a um ticket pai",
+    "ticketId":"Ticket ID's",
+    "ticketForm": "Formulário",
+    "requester": "Corresponsável",
+    "requesterName": "Nome Corresponsável",
+    "assignName": "Agente Responsável",
+    "group": "Grupo Responsável",
+    "groups": "Grupos Responsáveis",
+    "ticketType": "Tipo",
+    "dueDate":"Due Date",
+    "tickPri": "Prioridade",
+    "subject":"Assunto",
+    "subjPlace":"Digite Assunto",
+    "description":"Descrição",
+    "descPlace": "Descreva o problema",
+    "btnCreateSigle": "Criar Ticket Filhos",
+    "btnCreateBulk":"Criar Tickets Filhos"
+    },
+  "none": "Não está atualmente em um projeto",
+  "status":{
+    "new": "Novo",
+    "open": "Aberto",
+    "pending": "Pendente",
+    "hold": "Em espera",
+    "solved": "Resolvido",
+    "closed": "Fechado"
+  },
+  "priority":{
+    "low": "Baixa",
+    "normal": "Normal",
+    "high": "Alta",
+    "urgent": "Urgente"
+  },
+  "type":{
+    "question":"Pergunta",
+    "incident":"Incidente",
+    "problem":"Problema",
+    "task":"Tarefa"
+  }
+}

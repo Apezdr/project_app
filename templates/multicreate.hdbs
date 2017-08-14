@@ -1,0 +1,87 @@
+<div class="row-fluid">
+	<div class="well span12">
+		<div class="control-group">
+    	<div class="select" required = "required">
+        <label for="zendeskForm">{{t "form.ticketForm"}}</label>
+        <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
+        	<option value="">-</option>
+          {{#each ticketForm}}
+            <option value="{{@key}}" {{#if selected}} selected="selected" {{/if}}>{{name}}</option>
+          {{/each}}
+				</select>
+			</div>
+    </div>
+
+		<div class="control-group">
+    	<label for="userEmail">{{t "form.requester"}}</label>
+			<input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" style="width: 196px" value="{{email}}"/>
+    </div>
+
+		<div class="control-group" style="display: none;">
+    	<label for="userName">Requester Name</label>
+      <input type="text" required placeholder="Requester Name" name="userName" id="userName" style="width: 196px;" value=""/>
+    </div>
+
+    {{!-- removed because assigning assignees to multiple groups isn't possible.   <div class="control-group">
+      <label for="assigneeId">{{t "form.assignName"}}</label>
+      <input type="text" placeholder="Assignee" name="assigneeName" id="assigneeName" style="width: 196px" value="{{assigneeName}}"/>
+    </div>
+
+    <div class="control-group" style="display: none;">
+      <label for="assigneeId">Assignee Id</label>
+      <input type="text" placeholder="Assignee id" name="assigneeId" id="assigneeId" value="{{assigneeId}}"/>
+    </div> --}}
+
+		<div class="control-group">
+			<div class="select" required = "required">
+		  	<label for="zendeskGSelect">{{t "form.groups"}}</label>
+		    <select id="zendeskGSelect" required name="zendeskGSelect"  style="width: auto;" size="1" multiple>
+				{{#each groups}}
+		    	<option value="{{value}}">{{label}}</option>
+				{{/each}}
+				</select>
+			</div>
+		</div>
+
+		<div class="control-group">
+    	<div class="select" required = "required">
+      	<label for="zenType">{{t "form.ticketType"}}</label>
+        <select id="zenType" required name="zenType"  style="width: auto;" size="1">
+          {{#each ticketType}}
+            <option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
+          {{/each}}
+      	</select>
+			</div>
+    </div>
+
+		<div class="control-group" style="display: none;">
+    	<label for="dueDate">{{t "form.dueDate"}}</label>
+      <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" style="width: 196px;" value=""/>
+    </div>
+
+		<!-- <div class="control-group">
+			<div class="select" required = "required">
+      	<label for="zenPri">{{t "form.tickPri"}}</label>
+        <select id="zenPri" required name="zenPri"  style="width: auto;" size="1">
+          {{#each ticketPri}}
+            <option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
+          {{/each}}
+        </select>
+			</div>
+    </div>
+    -->
+		<div class="control-group">
+			<label for="userSub">{{t "form.subject"}}</label>
+		  <input required placeholder="{{t "form.subjPlace"}}" type="text" name="userSub" id="userSub" style="width: 196px" value="{{subject}}"/>
+		</div>
+
+		<div class="control-group">
+			<label for="ticketDesc">{{t "form.description"}}</label>
+			<textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="{{t "form.descPlace"}}">{{desc}}</textarea>
+		</div>
+
+		<div class="control-group">
+			<button class='submitSpoke ember-view btn'>{{t 'form.btnCreateBulk'}}</button>
+		</div>
+	</div>
+</div>
