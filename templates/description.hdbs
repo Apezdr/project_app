@@ -1,4 +1,0 @@
-{{#createResult}}
-  <div>{{t "form.ticket"}} <a href="#/tickets/{{id}}"><b>#{{id}}</b></a> {{t "form.wasCreated"}} {{external_id}}</div>
-  <br>
-{{/createResult}}

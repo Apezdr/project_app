@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Project App V2</title>
+    <link href="stylesheets/garden-index.css" rel="stylesheet">
+    <link href="stylesheets/garden-editor.css" rel="stylesheet">
+    <link href="stylesheets/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="stylesheets/main.css">
+
+    <script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+  </head>
+  <body>
+    <div class="navigation-buttons centered">
+      <button class='displayList ember-view btn'>Project List</button>
+      <button class='parent displayForm ember-view btn'>Create Single</button>
+      <button class='parent displayMultiCreate ember-view btn'>Create Bulk</button>
+      <button class='parent displayUpdate ember-view btn'>Add Existing</button>
+      <button class='child removeTicket ember-view btn'>Remove ticket from project</button>
+    </div>
+
+    <div id="app"></div>
+
+    <script>
+      var client = ZAFClient.init();
+    </script>
+ 
+    <script src="lib/javascripts/jquery.min.js"></script>
+    <script src="lib/javascripts/jquery-ui.min.js"></script>
+    <script src="lib/javascripts/jquery-handlebars-1.1.4.min.js"></script>
+    <script src="lib/javascripts/underscore.min.js"></script>
+    <script src="main.js"></script>
+
+  </body>
+</html>
