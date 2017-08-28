@@ -1,0 +1,11 @@
+{{#createResult}}
+	{{#ifCond type "add"}}
+	  <div>{{t "form.ticket"}} <a href="#" data-id="{{id}}" class="open-ticket-tab"><b>#{{id}}</b></a> {{t "form.wasCreated"}} {{external_id}}</div>
+	  <br>
+	{{/ifCond}}
+
+	{{#ifCond type "remove"}}
+	  <div>Ticket <a href="#" data-id="{{id}}" class="open-ticket-tab"><b>#{{id}}</b></a> was removed</div>
+	  <br>
+	{{/ifCond}}
+{{/createResult}}

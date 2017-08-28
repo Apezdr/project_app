@@ -73,7 +73,9 @@
     "description":"Descrição",
     "descPlace": "Descreva o problema",
     "btnCreateSigle": "Criar Ticket Filhos",
-    "btnCreateBulk":"Criar Tickets Filhos"
+    "btnCreateBulk":"Criar Tickets Filhos",
+    "btnPrev":"Anterior",
+    "btnNext":"Próximo"
     },
   "none": "Não está atualmente em um projeto",
   "status":{

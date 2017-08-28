@@ -19,10 +19,6 @@
         "label": "Preset template mappings",
         "helpText": "Settings for ticket types to set groups for bulk ticket creates. It needs to be in a JSON format"
       },
-      "prefillAssignee" : {
-        "label": "Prefill assignee and group",
-        "helpText": "Prefill the assignee and group fields in the creation form, taken over from the current ticket."
-      },
       "defaultTicketType" : {
         "label": "Default ticket type",
         "helpText": "Instead of taking over the ticket type from the current ticket, use this type by default. Empty (to take over), or one of: question, incident, problem, or task."
@@ -73,7 +69,9 @@
     "description":"Description",
     "descPlace": "Please Describe the issue",
     "btnCreateSigle": "Create Single Ticket",
-    "btnCreateBulk":"Create Bulk Tickets"
+    "btnCreateBulk":"Create Bulk Tickets",
+    "btnPrev":"Prev",
+    "btnNext":"Next"
     },
   "none": "Not currently in a Project",
   "status":{

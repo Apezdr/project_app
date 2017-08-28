@@ -22,14 +22,3 @@ When viewing a ticket that is not currently in a project a button will be displa
 ## Contribution:
 
 Pull requests are welcome.
-
-## Screenshot(s):
-The Settings page:
-![](/assets/project-app-settings-page.png)
-
-The listing of tickets page:
-![](/assets/project-app-ticket-listing.png)
-
-Create single ticket:
-![](/assets/project-app-create-single.png)
-

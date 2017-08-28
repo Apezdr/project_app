@@ -1,0 +1,124 @@
+<div class="well">
+  <div class="control-group">
+    <label for="zendeskForm">{{t "form.ticketForm"}}</label>
+    <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
+      <option value="">-</option>
+      {{#each ticketForm}}
+        <option value="{{@key}}" {{#if selected}} selected {{/if}}>{{name}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="control-group" id="custom-fields-row">
+    <div id='custom-fields'>
+    {{#each fields}}
+      <div class="control-group">
+        <label for="{{id}}">{{title}}</label>
+        {{#if text}}
+          <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
+        {{else}}
+        {{#if textarea}}
+          <textarea required="required" rows="5" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}">{{set_value}}</textarea>
+        {{else}}
+        {{#if checkbox}}
+          <input id="{{id}}" name="{{id}}" {{#ifCond set_value true}} checked="checked" {{/ifCond}} type="checkbox">
+        {{else}}
+        {{#if date}}
+          <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
+        {{else}}
+        {{#if integer}}
+          <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
+        {{else}}
+        {{#if decimal}}
+          <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
+        {{else}}
+        {{#if regexp}}
+          <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
+        {{else}}
+        {{#if tagger}}
+          <select id="{{id}}" required name="{{id}}"  style="width: auto;" size="1">
+            <option value="">-</option>
+            {{#each custom_field_options}}
+              <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
+            {{/each}}
+            {{#each system_field_options}}
+              <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
+            {{/each}}
+          </select>
+        {{else}}
+        {{#if pri}}
+          <select id="zenPri" required = "required" name="zenPri"  style="width: auto;" size="1">
+            <option value="">-</option>
+            {{#each system_field_options}}
+              <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
+            {{/each}}
+          </select>
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+      </div>
+    {{/each}}
+    </div>
+  </div>
+  <div class="control-group">
+    <label for="userEmail">{{t "form.requester"}}</label>
+    <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" value="{{email}}"/>
+  </div>
+
+  <div class="control-group" style="display: none;">
+    <label for="userName">{{t "form.requesterName"}}</label>
+    <input type="text" required placeholder="Requester Name" name="userName" id="userName" value=""/>
+  </div>
+
+  <div class="control-group">
+    <label for="zendeskGroup">{{t "form.group"}}</label>
+    <input type="text" placeholder="Group Name" name="zendeskGroup" id="zendeskGroup" value="{{groupName}}"/>
+  </div>
+  <br>
+  <div class="control-group" style="display: none;">
+    <label for="zendeskGSelect">Group Id</label>
+    <input type="text" required placeholder="Group id" name="zendeskGSelect" id="zendeskGSelect" value="{{groupId}}"/>
+  </div>
+	<div class="control-group">
+		<label for="assigneeId">{{t "form.assignName"}}</label>
+		<input type="text" placeholder="Assignee" name="assigneeName" id="assigneeName" disabled="disabled" value="{{assigneeName}}" />
+	</div>
+
+	<div class="control-group" style="display: none;">
+		<label for="assigneeId">Assignee Id</label>
+		<input type="text" placeholder="Assignee id" name="assigneeId" id="assigneeId" value="{{assigneeId}}"/>
+	</div>
+	<div class="control-group">
+		<div class="select" required = "required">
+			<label for="zenType">{{t "form.ticketType"}}</label>
+			<select id="zenType" required name="zenType"  style="width: auto;" size="1">
+				{{#each ticketType}}
+					<option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
+				{{/each}}
+			</select>
+		</div>
+	</div>
+  <div class="control-group" style="display: none;">
+    <label for="dueDate">{{t "form.dueDate"}}</label>
+    <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" value=""/>
+  </div>
+
+  <div class="control-group">
+    <label for="userSub">{{t "form.subject"}}</label>
+    <input required placeholder="Enter Subject" type="text" name="userSub" id="userSub" value="{{subject}}"/>
+  </div>
+  <br>
+  <div class="control-group">
+    <label for="ticketDesc">{{t "form.description"}}</label>
+    <textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" placeholder="Please Describe the issue">{{desc}}</textarea>
+  </div>
+
+  <div class="control-group">
+    <button class='submitSpoke ember-view btn'>{{t "form.btnCreateSigle"}}</button>
+  </div>
+</div>
