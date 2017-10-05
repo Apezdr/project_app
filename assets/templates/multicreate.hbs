@@ -12,61 +12,7 @@
 </div>
 
 <div class="control-group" id="custom-fields-row">
-	<div id='custom-fields'>
-	{{#each fields}}
-	  <div class="control-group">
-	    <label for="{{id}}">{{title}}</label>
-	    {{#if text}}
-	      <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
-	    {{else}}
-	    {{#if textarea}}
-	      <textarea required="required" rows="5" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}">{{set_value}}</textarea>
-	    {{else}}
-	    {{#if checkbox}}
-	      <input id="{{id}}" name="{{id}}" {{#ifCond set_value true}} checked="checked" {{/ifCond}} type="checkbox">
-	    {{else}}
-	    {{#if date}}
-	      <input type="{{type}}" name="{{id}}" id="{{id}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
-	    {{else}}
-	    {{#if integer}}
-	      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
-	    {{else}}
-	    {{#if decimal}}
-	      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
-	    {{else}}
-	    {{#if regexp}}
-	      <input type="text" name="{{id}}" id="{{id}}" pattern="{{regexp_for_validation}}" placeholder="{{raw_description}}" value="{{set_value}}"/>
-	    {{else}}
-	    {{#if tagger}}
-	      <select id="{{id}}" required name="{{id}}"  style="width: auto;" size="1">
-	        <option value="">-</option>
-	        {{#each custom_field_options}}
-	          <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
-	        {{/each}}
-	        {{#each system_field_options}}
-	          <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
-	        {{/each}}
-	      </select>
-	    {{else}}
-	    {{#if pri}}
-	      <select id="zenPri" required = "required" name="zenPri"  style="width: auto;" size="1">
-	        <option value="">-</option>
-	        {{#each system_field_options}}
-	          <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
-	        {{/each}}
-	      </select>
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	    {{/if}}
-	  </div>
-	{{/each}}
-	</div>
+	
 
 </div>
 
