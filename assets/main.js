@@ -31,7 +31,6 @@ var DATA = {
   isPublic: true,
   strTicketDescription: '',
   strNewTicketDescription: '',
-  intTicketID: 0,
   next_page: 0,
   prev_page: 0,
   isPrevPage: true,
@@ -104,12 +103,14 @@ function firstData(){
   Promise.all([client.get('currentUser.locale'),
     client.get('ticket'),
     client.get('ticket.assignee.user'),
-    client.get('ticket.assignee.group')]).then(
+    client.get('ticket.assignee.group'),
+    client.get('ticketFields')]).then(
       function fullfilled(contents){
         DATA.strUserLocale = contents[0]['currentUser.locale'];
         DATA.objTicket = contents[1].ticket;
         DATA.objTicket.assignee = contents[2]['ticket.assignee.user'];
         DATA.objTicket.group = contents[3]['ticket.assignee.group'];
+        processCurrentTicketFields(contents[4]);
         this.getTicketFormData();
         this.tryRequire(DATA.strUserLocale);
       }
@@ -673,22 +674,48 @@ function getGroupsData(intPage) {
 
     return arTypes;
   }
-
-  function getExternalID(intTicketID) {
-
-      var objRequest = {
-        url: '/api/v2/tickets/' + intTicketID + '.json',
-        type:'GET',
-        dataType: 'json'
-      };
-
-      client.request(objRequest).then(function(objData) {
-        DATA.objCurrentTicket = objData.ticket;
-        var thereAreNulls = [undefined, null, ''];
-        var isNotEmpty = (_.indexOf(thereAreNulls, objData.ticket.external_id) === -1);
-        if (isNotEmpty) {
-          getProjectSearch(objData.ticket.external_id, 1);
+  function processCurrentTicketFields(data){
+     DATA.objCurrentTicket.custom_fields = [];
+      data.ticketFields.forEach(function(x){
+        if(x.type !== 'built-in'){
+          client.get('ticketFields:'+ x.name).then(function(d){
+          for (var i in d) {
+            if (d.hasOwnProperty(i)) {
+              if(i !== 'errors' ){
+                if((d[i].type !== 'priority')&&(d[i].type !== 'tickettype')){
+                  d[i].id = parseInt(d[i].name.match(/(?!custom_field_)(\d+)/)[0], 10);
+                  DATA.objCurrentTicket.custom_fields.push(d[i]);
+                } else {
+                  d[i].id =d[i].name;
+                  DATA.objCurrentTicket.custom_fields.push(d[i]);
+                }
+              }
+            }
+          }
+          });
         }
+      });
+  }
+  function getCurrentTicketFieldVal(){
+    console.log('huh',DATA.objCurrentTicket.custom_fields);
+    DATA.objCurrentTicket.custom_fields.forEach(function(i){
+      if((i.type !== 'priority')&&(i.type !== 'tickettype')){
+        client.get('ticket.customField:'+i.name).then(function(x){
+            i.value = x["ticket.customField:"+i.name];
+        });
+      }
+    });
+  }
+  function getExternalID() {
+    client.get('ticket.externalId').then(function(id){
+        console.log('skip',id["ticket.externalId"]);
+        var exId = id["ticket.externalId"];
+        var thereAreNulls = [undefined, null, ''];
+        var isNotEmpty = (_.indexOf(thereAreNulls, exId) === -1);
+        if (isNotEmpty) {
+          getProjectSearch(exId, 1);
+        }
+        getCurrentTicketFieldVal();
         processTicketFields(1);
         resizeApp();
       }.bind(this), function(error) {
@@ -1295,7 +1322,9 @@ function getGroupsData(intPage) {
       if ( $(this).is(':checked')) {
         $('#ticketDesc').val(DATA.strTicketDescription);
       } else {
-        $('#ticketDesc').val("Child of Ticket #" + DATA.intTicketID);
+        client.get('ticket.id').then(function(id){
+          $('#ticketDesc').val("Child of Ticket #" + id["ticket.id"]);
+        });
       }
     });
 
