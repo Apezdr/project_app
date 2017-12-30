@@ -697,7 +697,6 @@ function getGroupsData(intPage) {
       });
   }
   function getCurrentTicketFieldVal(){
-    console.log('huh',DATA.objCurrentTicket.custom_fields);
     DATA.objCurrentTicket.custom_fields.forEach(function(i){
       if((i.type !== 'priority')&&(i.type !== 'tickettype')){
         client.get('ticket.customField:'+i.name).then(function(x){
@@ -708,7 +707,6 @@ function getGroupsData(intPage) {
   }
   function getExternalID() {
     client.get('ticket.externalId').then(function(id){
-        console.log('skip',id["ticket.externalId"]);
         var exId = id["ticket.externalId"];
         var thereAreNulls = [undefined, null, ''];
         var isNotEmpty = (_.indexOf(thereAreNulls, exId) === -1);
@@ -796,7 +794,6 @@ function getGroupsData(intPage) {
     var arFieldList = $('#custom-fields :input').serializeArray();
     var arGroupSelected = [];
     DATA.arCreateResultsData = [];
-
     if (Array.isArray($('#zendeskGSelect').val())) {
       arGroupSelected = $('#zendeskGSelect').val();
     } else {
@@ -860,13 +857,6 @@ function getGroupsData(intPage) {
             objRootTicket.ticket.custom_fields[objField.name] = objField.value;
           });
 
-          duplicateCustomFieldsValues(objRootTicket.ticket);
-
-          var isCopyDescription = $('#copyDescription').is(':checked');
-
-          if (! isCopyDescription) {
-            objRootTicket.ticket.comment.public = false;
-          }
 
           createTicket(objRootTicket);
       });
@@ -890,36 +880,6 @@ function getGroupsData(intPage) {
     }.bind(this), function(error) {
       console.error('Could not get ticket form data', error)
     });
-  }
-
-  function duplicateCustomFieldsValues(ticketObjectForApi) {
-
-    client.metadata().then(function(metadata) {
-      var customFieldIdsToCopySetting = metadata.settings.customFieldIdsToCopy || '';
-      var customFieldIdsToCopy = customFieldIdsToCopySetting.match(/\b\d+\b/g);
-
-      // Done if there are none.
-      if (!(customFieldIdsToCopy && customFieldIdsToCopy.length)) {
-        return;
-      }
-
-      // Copy the value of each (existing) custom field. Don't overwrite.
-      if (!_.has(ticketObjectForApi, 'custom_fields')) {
-        ticketObjectForApi.custom_fields = {};
-      }
-      customFieldIdsToCopy.forEach(function(customFieldIdToCopy) {
-
-        if (_.has(ticketObjectForApi.custom_fields, customFieldIdToCopy)) {
-          return;
-        }
-
-        client.get('ticket.customField:custom_field_' + customFieldIdToCopy).then(function(objTicket) {
-          ticketObjectForApi.custom_fields[customFieldIdToCopy] = objTicket['ticket.customField:custom_field_' + customFieldIdToCopy];
-        });
-
-      });
-    });
-
   }
 
   function processData(objData, strType) {
@@ -1317,16 +1277,6 @@ function getGroupsData(intPage) {
       $( "#dueDate" ).datepicker( "option", "dateFormat", 'MM d, yy' );
     });
 
-
-    $(document).on('change', '#copyDescription', function() {
-      if ( $(this).is(':checked')) {
-        $('#ticketDesc').val(DATA.strTicketDescription);
-      } else {
-        client.get('ticket.id').then(function(id){
-          $('#ticketDesc').val("Child of Ticket #" + id["ticket.id"]);
-        });
-      }
-    });
 
     $(document).tooltip({
       tooltipClass: "tooltip-styling"

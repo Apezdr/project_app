@@ -12,7 +12,7 @@
 </div>
 
 <div class="control-group" id="custom-fields-row">
-	
+
 
 </div>
 
@@ -58,14 +58,10 @@
   <input required placeholder="Enter Subject" type="text" name="userSub" id="userSub" style="width: 196px" value="{{subject}}"/>
 </div>
 
-<div class="control-group">
-	<label for="copy description">Copy Description?</label>
-	<input required type="checkbox" name="copyDescription" id="copyDescription">
-</div>
 
 <div class="control-group">
 	<label for="ticketDesc">Description</label>
-	<textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please Describe the issue">Child of Ticket #{{intTicketID}}</textarea>
+	<textarea required="required" rows="10" name="ticketDesc" id="ticketDesc" style="width: 196px" placeholder="Please Describe the issue">{{desc}}</textarea>
 </div>
 
 <div class="control-group">

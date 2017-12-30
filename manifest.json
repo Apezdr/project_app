@@ -1,7 +1,7 @@
 {
   "name": "Project App V2",
   "author": {
-    "name": "Ruth Anne Dilig",
+    "name": "Skip Moore",
     "email": "labs@zendesk.com",
     "url": ""
   },
@@ -16,19 +16,11 @@
     "name": "appendSubject",
     "type": "checkbox"
   }, {
-    "name": "settingsMap",
-    "type": "multiline",
-    "required": false
-  }, {
     "name": "defaultTicketType",
     "type": "text",
     "required": false
   }, {
     "name": "defaultTicketPriority",
-    "type": "text",
-    "required": false
-  }, {
-    "name": "customFieldIdsToCopy",
     "type": "text",
     "required": false
   }],
