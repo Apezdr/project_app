@@ -1,0 +1,55 @@
+
+
+{{#if projects.length}}
+  <ul class="pager">
+    <div class="pager-wrapper">
+      {{#if isPrevPage}}
+        <li><a href="#" class="prev-page">Prev</a></li>
+      {{/if}}
+      {{#if isNextPage}}
+        <li><a href="#" class="next-page">Next</a></li>
+      {{/if}}
+    </div>
+  </ul>
+  <div>
+    {{#each projects}}
+      {{#selected}}
+        <h5>{{t "form.tableParent"}}</h5>
+        <table class="table table-condensed">
+          <tbody>
+            <tr class="tooltip arrow-left" title="{{t "form.tableType"}}: {{type}} {{t "form.tablePri"}}: {{priority}} {{t "form.tableAssign"}}: {{assignee_id}} {{t "form.tableGroup"}}: {{group_id}}">
+              <td><a href="#" class="open-ticket-tab" data-id="{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+              <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      {{/selected}}
+    {{/each}}
+
+    <h5>{{t "form.tableChildren"}}</h5>
+    {{#each projects}}
+      {{^selected}}
+        <table class="table table-condensed">
+          <tbody>
+            <tr class="tooltip arrow-left" title="{{t "form.tableType"}}: {{type}} {{t "form.tablePri"}}: {{priority}} {{t "form.tableAssign"}}: {{assignee_id}} {{t "form.tableGroup"}}: {{group_id}}">
+              <td><a href="#" class="open-ticket-tab" data-id="{{id}}"><b>#{{id}}</b> {{subject}}</a></td>
+              <td class="ticket_status"><span class="ticket_status_label toolbar {{status}}">{{statusTitle}}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      {{/selected}}
+    {{/each}}
+  </div>
+  <ul class="pager">
+    <div class="pager-wrapper">
+      {{#if isPrevPage}}
+        <li><a href="#" class="prev-page">{{t "form.btnPrev"}}</a></li>
+      {{/if}}
+      {{#if isNextPage}}
+        <li><a href="#" class="next-page">{{t "form.btnNext"}}</a></li>
+      {{/if}}
+    </div>
+  </ul>
+{{else}}
+  <p>{{t "none"}}</p>
+{{/if}}
