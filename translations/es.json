@@ -2,6 +2,8 @@
   "app": {
     "name": "Problem App",
     "description": "Crear Entradas para niños que todos acoplamiento de nuevo a un boleto de los padres.",
+    "installation_instructions": "Requiere un campo de texto para la identificación del proyecto. Esto es para que se puedan construir vistas.",
+    "long_description": "Al ver un ticket que no se encuentra actualmente en un proyecto, se mostrará un botón para realizar un proyecto desde este ticket. Después de hacer clic en el botón, se le dará la opción de crear un único boleto o boleto a granel. Al hacer clic en cualquiera de esos botones, se copiará el formulario de ticket de tickets actual, los campos de ticket, el solicitante y la descripción en el formulario de ticket en la aplicación. Crear un boleto individual le permitirá seleccionar un grupo. El ticket masivo tendrá un cuadro de selección múltiple que le permitirá usar cntl clic para seleccionar múltiples grupos. Al abordar el ticket de aplicación, se creará un ticket para cada grupo seleccionado y se mostrará una lista de los tickets creados.",
     "parameters" : {
       "Custom_Field_ID" : {
         "label": "El campo ID de encargo",

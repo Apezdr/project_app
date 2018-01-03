@@ -1,9 +1,9 @@
 {
-  "name": "Project App V2",
+  "name": "Project App",
   "author": {
     "name": "Skip Moore",
     "email": "labs@zendesk.com",
-    "url": ""
+    "url": "https://www.zendesk.com/customer-experience"
   },
   "parameters": [{
     "name": "Custom_Field_ID",
@@ -25,7 +25,7 @@
     "required": false
   }],
   "defaultLocale": "en",
-  "private": true,
+  "private": false,
   "location": {
     "support": {
       "ticket_sidebar": "assets/iframe.html"
