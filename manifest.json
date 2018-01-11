@@ -1,8 +1,8 @@
 {
   "name": "Project App",
   "author": {
-    "name": "Skip Moore",
-    "email": "labs@zendesk.com",
+    "name": "Zendesk Labs",
+    "email": "zendesklabs@zendesk.com",
     "url": "https://www.zendesk.com/customer-experience"
   },
   "parameters": [{

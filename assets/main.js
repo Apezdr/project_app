@@ -62,6 +62,9 @@ var buildTicketFieldList = function(objItem) {
           case 'priority':
             objItem.pri = true;
             break;
+          case 'tickettype':
+            objItem.tickettype = true;
+            break;
           case 'checkbox':
             objItem.checkbox = true;
             break;
@@ -84,8 +87,8 @@ var buildTicketFieldList = function(objItem) {
         DATA.arTicketField.push(objItem);
       }
     }
-    DATA.objTicketForms['1'] = DATA.arTicketFieldList;
-    DATA.defaultTicketFormID = 1;
+    DATA.objTicketForms[1] = DATA.arTicketField;
+    //DATA.defaultTicketFormID = 1;
   };
 
 // pull the metadata for the settings
@@ -104,14 +107,15 @@ function firstData(){
     client.get('ticket'),
     client.get('ticket.assignee.user'),
     client.get('ticket.assignee.group'),
-    client.get('ticketFields')]).then(
+    client.get('ticketFields'),
+    client.get('currentAccount.planName')]).then(
       function fullfilled(contents){
         DATA.strUserLocale = contents[0]['currentUser.locale'];
         DATA.objTicket = contents[1].ticket;
         DATA.objTicket.assignee = contents[2]['ticket.assignee.user'];
         DATA.objTicket.group = contents[3]['ticket.assignee.group'];
         processCurrentTicketFields(contents[4]);
-        this.getTicketFormData();
+        this.getTicketFormData(contents[5]);
         this.tryRequire(DATA.strUserLocale);
       }
     );
@@ -202,9 +206,7 @@ var buildGroupList = function(objItem) {
 };
 
 var buildTicketFormList = function(objItem) {
-
   if ( !objItem.active ) { return; }
-
     DATA.objTicketForms[objItem.id] = objItem.ticket_field_ids;
     DATA.objTicketForms[objItem.id].name = objItem.name;
     DATA.objTicketForms[objItem.id].id = objItem.id;
@@ -243,7 +245,6 @@ var processTicketFields = function(next){
   var arDisplayFields = [];
   var strNewSubject = DATA.objTicket.subject;
   var intTicketID = DATA.objTicket.id;
-  var strTicketType = getTicketTypes(DATA.default_ticket_type || DATA.objTicket.type);
   var objRequest = {
     url: '/api/v2/ticket_fields.json?lang=' + DATA.strUserLocale +'&page=' + next,
     type:'GET',
@@ -265,6 +266,7 @@ var processTicketFields = function(next){
   $.each(DATA.objTicketForms,function(i, obj){
     delete obj.selected;
   });
+
   var arSelectedForm =  DATA.objTicketForms[DATA.currentTicketformID];
   DATA.objTicketForms[DATA.currentTicketformID].selected = true;
   client.request(objRequest).then(function(objData) {
@@ -272,17 +274,16 @@ var processTicketFields = function(next){
     //var intNextPage = next;
     _.each(objData.ticket_fields, buildTicketFieldList, this);
     DATA.arTicketField.forEach(function(objList) {
+      if(DATA.notEnterprise && objList.type === 'tickettype'){arDisplayFields.push(objList);}
+      if(DATA.notEnterprise && objList.type === 'priority'){arDisplayFields.push(objList);}
       if(_.contains(arSelectedForm, objList.id)){
-          if(objList.type != "tickettype") {
             arDisplayFields.push(objList);
-          }
         }
     });
 
     $.each(arDisplayFields, function(index, objDisplayFields) {
        DATA.objCurrentTicket.custom_fields.forEach(function(objData){
           if (objDisplayFields.id == objData.id) {
-            //this loop is *******BROKEN********** it set_value on the options to the last one in the list
               if (objDisplayFields.type == "tagger") {
                 for (var i = 0; i < arDisplayFields[index]['custom_field_options'].length; i++) {
                   arDisplayFields[index]['custom_field_options'][i]['set_value'] = objData.value;
@@ -293,6 +294,11 @@ var processTicketFields = function(next){
               }
           }
         });
+        if (objDisplayFields.type == "tickettype") {
+            for (var i = 0; i < arDisplayFields[index]['system_field_options'].length; i++) {
+            arDisplayFields[index]['system_field_options'][i]['set_value'] = DATA.default_ticket_type || DATA.objTicket.type;
+          }
+        }
 
         if (objDisplayFields.type == "priority") {
             for (var i = 0; i < arDisplayFields[index]['system_field_options'].length; i++) {
@@ -300,7 +306,6 @@ var processTicketFields = function(next){
           }
         }
     });
-    // DATA.ticketFieldcomp.fields = arDisplayFields;
     if ($('#assigneeName').length === 1) {
       switchToRequester();
     } else if ($('#zendeskGroup').length === 1) {
@@ -308,6 +313,7 @@ var processTicketFields = function(next){
     }
   });
   // end of processing ticket fields
+
   DATA.ticketFieldcomp = {
    ticketForm: DATA.objTicketForms,
    currentForm: DATA.currentTicketformID,
@@ -319,7 +325,6 @@ var processTicketFields = function(next){
    groupId: strGroupID,
    subject: strNewSubject,
    desc: DATA.objTicket.description,
-   ticketType: strTicketType,
    intTicketID: intTicketID,
    fields: arDisplayFields
  };
@@ -367,8 +372,18 @@ var buildTicketList = function(objItem) {
       DATA.arTicketList.push(objList);
 };
 
-function getTicketFormData() {
-  getTicketForms(1);
+function getTicketFormData(plan) {
+  if(plan['currentAccount.planName'] === "Enterprise"){
+    getTicketForms(1);
+  } else {
+    DATA.notEnterprise = true;
+    //processTicketFields(1);
+    DATA.objTicket.form.id = 1;
+    DATA.objTicketForms[1] =[];
+    DATA.objTicketForms[1].name = 'Default';
+    DATA.objTicketForms[1].id = 1;
+    getProjectData();
+  }
 };
 function getTicketForms(intPage) {
 
@@ -379,7 +394,6 @@ function getTicketForms(intPage) {
   };
 
   client.request(objRequest).then(function(objData) {
-
     processTicketForms(objData);
     // DATA.objTicketFormResponse = objData;
 
@@ -410,18 +424,17 @@ function processTicketForms(objData) {
 }
 
 function getProjectData() {
-
   var strProjectField;
   getGroupsData(1);
   // get the external id
   getExternalID(DATA.objTicket.id);
-  DATA.currentTicketformID =  DATA.objTicket.form.id || DATA.defaultTicketFormID;
+  DATA.currentTicketformID =  DATA.objTicket.form.id;
   projectNameFieldExist();
 }
 
 function projectNameFieldExist() {
   var thereAreNulls = [undefined, null, ''];
-
+  if(DATA.notEnterprise){return;}
   if ( _.indexOf(DATA.objTicketForms[DATA.currentTicketformID], parseInt(DATA.Custom_Field_ID, 10)) !== -1 ) {
 
     client.get('ticket.customField:custom_field_' + DATA.Custom_Field_ID).then(function(objTicket) {
@@ -563,12 +576,6 @@ function getGroupsData(intPage) {
       $('button.displayList').show();
       $('button.displayForm').hide();
       $('button.displayMultiCreate').show();
-
-      if (DATA.notEnterprise) {
-        $('#zendeskForm').val(1);
-        $('#zendeskForm').parent().hide();
-      }
-
       resizeApp();
 
       $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
@@ -576,6 +583,13 @@ function getGroupsData(intPage) {
       if($('#zenType').val() === 'task'){
         $('#dueDate').parent().show();
       }
+      $(document).ready(function(){
+        if (DATA.notEnterprise) {
+          $('#zendeskForm').val(1);
+          $('#zendeskForm').parent().hide();
+        }
+      })
+
 }
   function autocompleteRequesterEmail() {
     var self = this;
@@ -655,25 +669,6 @@ function getGroupsData(intPage) {
     });
   }
 
-  function getTicketTypes (strSelectedType){
-
-    var arTypes =
-    [
-      {'title': '-', 'value': ''},
-      {'title': 'Question', 'value': 'question'},
-      {'title': 'Incident', 'value': 'incident'},
-      {'title': 'Problem', 'value': 'problem'},
-      {'title': 'Task', 'value': 'task'}
-    ];
-
-    arTypes.forEach(function(objType) {
-      if (objType.value === strSelectedType) {
-        objType.selected = true;
-      }
-    });
-
-    return arTypes;
-  }
   function processCurrentTicketFields(data){
      DATA.objCurrentTicket.custom_fields = [];
       data.ticketFields.forEach(function(x){
@@ -685,9 +680,11 @@ function getGroupsData(intPage) {
                 if((d[i].type !== 'priority')&&(d[i].type !== 'tickettype')){
                   d[i].id = parseInt(d[i].name.match(/(?!custom_field_)(\d+)/)[0], 10);
                   DATA.objCurrentTicket.custom_fields.push(d[i]);
+                  if(DATA.notEnterprise){DATA.objTicketForms[1].push(d[i].id);}
                 } else {
                   d[i].id =d[i].name;
                   DATA.objCurrentTicket.custom_fields.push(d[i]);
+                  if(DATA.notEnterprise){DATA.objTicketForms[1].push(d[i].id);}
                 }
               }
             }
@@ -1012,12 +1009,6 @@ function getGroupsData(intPage) {
       var config = { attributes: true, childList: true, characterData: true };
       observer.observe(fieldRow, config);
 
-
-    if (DATA.notEnterprise) {
-      $('#zendeskForm').val(1);
-      $('#zendeskForm').parent().hide();
-    }
-
     resizeApp();
 
     $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
@@ -1031,10 +1022,12 @@ function getGroupsData(intPage) {
     $('button.displayForm').show();
     $('button.displayMultiCreate').hide();
     autocompleteRequesterEmail();
-    if (DATA.notEnterprise) {
-      $('#zendeskForm').val(1);
-      $('#zendeskForm').parent().hide();
-    }
+    $(document).ready(function(){
+      if (DATA.notEnterprise) {
+        $('#zendeskForm').val(1);
+        $('#zendeskForm').parent().hide();
+      }
+    })
 
 }
 
