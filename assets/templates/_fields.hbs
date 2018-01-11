@@ -1,6 +1,6 @@
 
 <div id='custom-fields'>
-  <p>loading from template</p>
+
 {{#each fields}}
   <div class="control-group">
     <label for="{{id}}">{{title}}</label>
@@ -35,6 +35,14 @@
           <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
         {{/each}}
       </select>
+      {{else}}
+      {{#if tickettype}}
+        <select id="zenType" required = "required" name="zenType"  style="width: auto;" size="1">
+          <option value="">-</option>
+          {{#each system_field_options}}
+            <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
+          {{/each}}
+        </select>
     {{else}}
     {{#if pri}}
       <select id="zenPri" required = "required" name="zenPri"  style="width: auto;" size="1">
@@ -43,6 +51,7 @@
           <option value="{{value}}" {{#ifCond set_value value}} selected="selected" {{/ifCond}}>{{name}}</option>
         {{/each}}
       </select>
+    {{/if}}
     {{/if}}
     {{/if}}
     {{/if}}

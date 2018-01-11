@@ -39,16 +39,7 @@
 		<label for="assigneeId">Assignee Id</label>
 		<input type="text" placeholder="Assignee id" name="assigneeId" id="assigneeId" value="{{assigneeId}}"/>
 	</div>
-	<div class="control-group">
-		<div class="select" required = "required">
-			<label for="zenType">{{t "form.ticketType"}}</label>
-			<select id="zenType" required name="zenType"  style="width: auto;" size="1">
-				{{#each ticketType}}
-					<option value="{{value}}" {{#if selected}} selected="selected" {{/if}}>{{title}}</option>
-				{{/each}}
-			</select>
-		</div>
-	</div>
+
   <div class="control-group" style="display: none;">
     <label for="dueDate">{{t "form.dueDate"}}</label>
     <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" value=""/>
