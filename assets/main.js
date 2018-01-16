@@ -132,7 +132,7 @@ client.on('app.activated', function(appData) {
 });
 
 function updateList() {
-  this.getExternalID(DATA.objTicket.id);
+  this.getExternalID();
 };
 // adding translation handler for handlebars
 Handlebars.registerHelper('t', function(key) {
@@ -427,14 +427,14 @@ function getProjectData() {
   var strProjectField;
   getGroupsData(1);
   // get the external id
-  getExternalID(DATA.objTicket.id);
+  getExternalID();
   DATA.currentTicketformID =  DATA.objTicket.form.id;
   projectNameFieldExist();
 }
 
 function projectNameFieldExist() {
   var thereAreNulls = [undefined, null, ''];
-  if(DATA.notEnterprise){return;}
+  //if(DATA.notEnterprise){return;}
   if ( _.indexOf(DATA.objTicketForms[DATA.currentTicketformID], parseInt(DATA.Custom_Field_ID, 10)) !== -1 ) {
 
     client.get('ticket.customField:custom_field_' + DATA.Custom_Field_ID).then(function(objTicket) {
@@ -695,9 +695,16 @@ function getGroupsData(intPage) {
   }
   function getCurrentTicketFieldVal(){
     DATA.objCurrentTicket.custom_fields.forEach(function(i){
-      if((i.type !== 'priority')&&(i.type !== 'tickettype')){
+      if((i.type !== 'priority')&&(i.type !== 'tickettype')&&(i.type !== 'date')){
         client.get('ticket.customField:'+i.name).then(function(x){
             i.value = x["ticket.customField:"+i.name];
+        });
+      } else if(i.type === 'date') {
+        client.get('ticket.customField:'+i.name).then(function(x){
+          if(x["ticket.customField:"+i.name] === null){i.value= null; return; }
+          var dateFix = new Date(x["ticket.customField:"+i.name]);
+          isoDate = dateFix.toISOString().split('T');
+          i.value = isoDate[0];
         });
       }
     });
