@@ -82,7 +82,22 @@ label {
   background: #F5CA00;
   color: white;
 }
-
+.ticket_status_label.pending, .sla-policy-metric-action-label.pending {
+  background: #30aabc;
+  color: white;
+}
+.ticket_status_label.solved, .sla-policy-metric-action-label.solved {
+  background: gray;
+  color: white;
+}
+.ticket_status_label.closed, .sla-policy-metric-action-label.closed {
+  background: gray;
+  color: white;
+}
+.ticket_status_label.hold, .sla-policy-metric-action-label.hold {
+  background: #000000;
+  color: white;
+}
 .table {
   width: 100%;
   margin-bottom: 18px;
@@ -149,7 +164,7 @@ td, th {
 
 td.ticket_status {
   text-align: right;
-} 
+}
 
 a, a:hover {
   text-decoration: none;
