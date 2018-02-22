@@ -9,7 +9,7 @@ var DATA = {
   arTicketField: [],
   arTicketList: [],
   ticketFieldcomp: {},
-  strUserLocale: '',
+  currentUser: {},
   notEnterprise: false,
   isSolvable: true,
   prependSubject: '',
@@ -103,20 +103,20 @@ client.metadata().then(function(metadata) {
 });
 
 function firstData(){
-  Promise.all([client.get('currentUser.locale'),
+  Promise.all([client.get('currentUser'),
     client.get('ticket'),
     client.get('ticket.assignee.user'),
     client.get('ticket.assignee.group'),
     client.get('ticketFields'),
     client.get('currentAccount.planName')]).then(
       function fullfilled(contents){
-        DATA.strUserLocale = contents[0]['currentUser.locale'];
+        DATA.currentUser = contents[0]['currentUser'];
         DATA.objTicket = contents[1].ticket;
         DATA.objTicket.assignee = contents[2]['ticket.assignee.user'];
         DATA.objTicket.group = contents[3]['ticket.assignee.group'];
         processCurrentTicketFields(contents[4]);
         this.getTicketFormData(contents[5]);
-        this.tryRequire(DATA.strUserLocale);
+        this.tryRequire(DATA.currentUser.locale);
       }
     );
 };
@@ -246,7 +246,7 @@ var processTicketFields = function(next){
   var strNewSubject = DATA.objTicket.subject;
   var intTicketID = DATA.objTicket.id;
   var objRequest = {
-    url: '/api/v2/ticket_fields.json?lang=' + DATA.strUserLocale +'&page=' + next,
+    url: '/api/v2/ticket_fields.json?lang=' + DATA.currentUser.locale +'&page=' + next,
     type:'GET',
     dataType: 'json'
   };
@@ -317,7 +317,7 @@ var processTicketFields = function(next){
   DATA.ticketFieldcomp = {
    ticketForm: DATA.objTicketForms,
    currentForm: DATA.currentTicketformID,
-   email: DATA.objTicket.requester.email,
+   email: DATA.objTicket.requester.email, 
    assigneeName: strAssigneeName,
    assigneeId: strAssigneeID,
    groupName:  strGroupName,
@@ -388,7 +388,7 @@ function getTicketFormData(plan) {
 function getTicketForms(intPage) {
 
   var objRequest = {
-    url:'/api/v2/ticket_forms.json?lang=' + DATA.strUserLocale + '&page=' + intPage,
+    url:'/api/v2/ticket_forms.json?lang=' + DATA.currentUser.locale + '&page=' + intPage,
     type:'GET',
     dataType: 'json'
   };
@@ -727,7 +727,7 @@ function getGroupsData(intPage) {
 
   function getProjectSearch (intExternalID, intPage, strURL) {
     var objRequest = {
-        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&per_page=50&lang=' + DATA.strUserLocale + '&page=' + intPage,
+        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&per_page=50&lang=' + DATA.currentUser.locale + '&page=' + intPage,
         type:'GET',
         dataType: 'json'
     };
@@ -1195,6 +1195,10 @@ function getGroupsData(intPage) {
   }
 
   // EVENTS
+ // pull the ticket data again if the parent is updated
+  client.on('ticket.submit.done', function(){
+    firstData();
+  })
 
   $(function() {
     $(document).on('click', '.makeproj', function(objData) {
