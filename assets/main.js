@@ -911,10 +911,8 @@ function getGroupsData(intPage) {
      });
     }
     if(!_.isUndefined(objData)) {
-
       // do not display the same ticket id
       if (strType == "add" && objData.ticket.id !== intTicketID) {
-        console.log('does this fire');
         DATA.arCreateResultsData.push({
           'id': objData.ticket.id,
           'external_id': objData.ticket.external_id,
