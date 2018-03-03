@@ -150,7 +150,7 @@ function tryRequire(locale) {
         DATA.context = flatten(data);
         // render default template
         $('#nav').render('nav',{});
-        $('#app').render('noproject',{});
+
       }).fail(function(x){
         //if the agents language is not available use the default
         tryRequire(DATA.defaultLocale);
@@ -716,6 +716,8 @@ function getGroupsData(intPage) {
         var isNotEmpty = (_.indexOf(thereAreNulls, exId) === -1);
         if (isNotEmpty) {
           getProjectSearch(exId, 1);
+        } else {
+          $('#app').render('noproject', {});
         }
         getCurrentTicketFieldVal();
         processTicketFields(1);
