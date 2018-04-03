@@ -317,7 +317,7 @@ var processTicketFields = function(next){
   DATA.ticketFieldcomp = {
    ticketForm: DATA.objTicketForms,
    currentForm: DATA.currentTicketformID,
-   email: DATA.objTicket.requester.email, 
+   email: DATA.objTicket.requester.email,
    assigneeName: strAssigneeName,
    assigneeId: strAssigneeID,
    groupName:  strGroupName,
@@ -887,16 +887,30 @@ function getGroupsData(intPage) {
   }
 
   function processData(objData, strType) {
-
     var intTicketID = DATA.objTicket.id;
 
     client.metadata().then(function(metadata) {
       client.set('ticket.customField:custom_field_' + metadata.settings.Custom_Field_ID, 'Project-' + intTicketID);
 
     });
+    // insuring the external is set and if not setting it
+    var thereAreNulls = [undefined, null, ''];
+    var isNotEmpty = (_.indexOf(thereAreNulls, objData.ticket.external_id) === -1);
+    if (!isNotEmpty) {
+      var objRequest = {
+         url: '/api/v2/tickets/' + intTicketID + '.json',
+         type:'PUT',
+         dataType: 'json',
+         data: '{"ticket":{"external_id": "Project-' + intTicketID+'"}}'
+     };
 
-    if(! _.isUndefined(objData)) {
-
+     client.request(objRequest).then(function(objData) {
+         processData(objData, strType);
+     }.bind(this), function(error) {
+       console.error('Could not get ticket form data', error)
+     });
+    }
+    if(!_.isUndefined(objData)) {
       // do not display the same ticket id
       if (strType == "add" && objData.ticket.id !== intTicketID) {
         DATA.arCreateResultsData.push({
