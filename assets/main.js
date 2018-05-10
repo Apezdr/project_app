@@ -40,7 +40,8 @@ var DATA = {
   defaultLocale: 'en-US',
   objTicket: {},
   default_ticket_type: '',
-  default_ticket_priority: ''
+  default_ticket_priority: '',
+  stay_on_save: false
 };
 var buildTicketFieldList = function(objItem) {
     // get default ticket form ID as necessary
@@ -108,7 +109,8 @@ function firstData(){
     client.get('ticket.assignee.user'),
     client.get('ticket.assignee.group'),
     client.get('ticketFields'),
-    client.get('currentAccount.planName')]).then(
+    client.get('currentAccount.planName'),
+    client.get('ticket.postSaveAction')]).then(
       function fullfilled(contents){
         DATA.currentUser = contents[0]['currentUser'];
         DATA.objTicket = contents[1].ticket;
@@ -116,6 +118,7 @@ function firstData(){
         DATA.objTicket.group = contents[3]['ticket.assignee.group'];
         processCurrentTicketFields(contents[4]);
         this.getTicketFormData(contents[5]);
+        this.stayOnSave(contents[6]);
         this.tryRequire(DATA.currentUser.locale);
       }
     );
@@ -560,7 +563,27 @@ function getGroupsData(intPage) {
 
     }.bind(this));
   }
+  function showDate() {
+    if($('#zenType').val() === 'task'){
+      $('#dueDate').parent().show();
+      console.log('date1',  DATA.objCurrentTicket)
+      $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+    } else {
+      $('#dueDate').parent().hide();
+    }
+  }
 
+  function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
 
   function switchToRequester () {
       $('#app').render('requester', DATA.ticketFieldcomp);
@@ -576,20 +599,18 @@ function getGroupsData(intPage) {
       $('button.displayList').show();
       $('button.displayForm').hide();
       $('button.displayMultiCreate').show();
+      
       resizeApp();
-
-      $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+      // BIG BUG DATA.objCurrentTicket.due_at doesn't exsist 
+      // $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
       $('#custom-fields-row').render('_fields', DATA.ticketFieldcomp);
-      if($('#zenType').val() === 'task'){
-        $('#dueDate').parent().show();
-      }
+      showDate();
       $(document).ready(function(){
         if (DATA.notEnterprise) {
           $('#zendeskForm').val(1);
           $('#zendeskForm').parent().hide();
         }
       })
-
 }
   function autocompleteRequesterEmail() {
     var self = this;
@@ -814,7 +835,6 @@ function getGroupsData(intPage) {
 
     if (DATA.isProceed) {
       putTicketData(arCurrentTags, 'project_parent', 'add', intTicketID);
-      addTicketTags(['project_parent', 'project_' + intTicketID], intTicketID);
     }
 
   }
@@ -943,23 +963,7 @@ function getGroupsData(intPage) {
     }
   }
 
-  function addTicketTags(arTags, intTicketID) {
 
-    var objRequest = {
-      url:'/api/v2/tickets/' + intTicketID + '/tags.json',
-      type:'PUT',
-      dataType: 'json',
-      data: {
-        tags: arTags
-      }
-    };
-
-
-    client.request(objRequest).then(function(objData) {
-    }.bind(this), function(error) {
-      console.error('Could not get ticket form data', error)
-    });
-  }
 
   function removeTicketTags(arTags, intTicketID) {
     var objRequest = {
@@ -1175,26 +1179,6 @@ function getGroupsData(intPage) {
     client.invoke('resize', { width: '100%', height: height + 'px' });
   }
 
-  function showDate() {
-    if($('#zenType').val() === 'task'){
-      $('#dueDate').parent().show();
-    } else {
-      $('#dueDate').parent().hide();
-    }
-  }
-
-  function formatDate(date) {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
-
   function getUrlParameter(sParam, strURL) {
     var sPageURL = decodeURIComponent(strURL.substring(1)),
         sURLVariables = sPageURL.split('&'),
@@ -1209,12 +1193,15 @@ function getGroupsData(intPage) {
         }
     }
   }
-
+  function stayOnSave(data) {
+    DATA.stay_on_save = (data['ticket.postSaveAction'] === 'stay_on_ticket') ? true : false;
+  }
   // EVENTS
  // pull the ticket data again if the parent is updated
   client.on('ticket.submit.done', function(){
+    console.log('fired')
     firstData();
-  })
+  });
 
   $(function() {
     $(document).on('click', '.makeproj', function(objData) {
