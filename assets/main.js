@@ -565,8 +565,10 @@ function getGroupsData(intPage) {
   function showDate() {
     if($('#zenType').val() === 'task'){
       $('#dueDate').parent().show();
-      console.log('date1',  DATA.objCurrentTicket)
-      $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
+      client.get('ticket.customField:due_date').then(function(dateData){
+        var currDate = formatDate(dateData['ticket.customField:due_date']);
+      $('#dueDate').val(currDate).datepicker({ dateFormat: 'yy-mm-dd' });
+      });
     } else {
       $('#dueDate').parent().hide();
     }
@@ -581,7 +583,7 @@ function getGroupsData(intPage) {
     if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
 
-    return [year, month, day].join('-');
+    return [year, month, day].join('-') +'T19:00:00Z';
   }
 
   function switchToRequester () {
@@ -848,7 +850,7 @@ function getGroupsData(intPage) {
           objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
           objRootTicket.ticket.subject = $('#userSub').val();
 
-          if (! _.isUndefined($('due_date').val())) {
+          if (!_.isUndefined($('#dueDate').val())) {
             objRootTicket.ticket.due_at = formatDate($('#dueDate').val());
           }
 
