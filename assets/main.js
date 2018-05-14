@@ -427,7 +427,6 @@ function processTicketForms(objData) {
 }
 
 function getProjectData() {
-  var strProjectField;
   getGroupsData(1);
   // get the external id
   getExternalID();
@@ -485,7 +484,7 @@ function getGroupsData(intPage) {
 }
 
   function listProjects(objData) {
-    var intNextPage = 1;
+    
     DATA.arTicketList = [];
 
     _.each(objData.users, buildAgentList, this);
@@ -613,7 +612,6 @@ function getGroupsData(intPage) {
       })
 }
   function autocompleteRequesterEmail() {
-    var self = this;
     // bypass this.form to bind the autocomplete.
     $('#userEmail').autocomplete({
       minLength: 3,

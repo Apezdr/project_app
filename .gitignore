@@ -3,4 +3,5 @@
 #
 # ignore zip files
  *.zip
+ .vscode
 tmp/
