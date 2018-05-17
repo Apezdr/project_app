@@ -224,22 +224,6 @@ var buildTicketFormList = function(objItem) {
     }
 };
 
- var buildAgentList = function(objItem) {
-
-  if(objItem.role !== 'end-user' && _.isUndefined( DATA.arAssignees[objItem.id] )){
-
-    DATA.arAssignees[objItem.id] = objItem.name;
-
-    //build an array for the ticket submit pages to create dropdown list
-    DATA.arAgentDrop.push({
-      'label': objItem.name,
-      'value': objItem.id
-    });
-
-  }
-};
-
-
 
 // process the ticket fields for the render functions
 var processTicketFields = function(next){
@@ -336,7 +320,6 @@ var processTicketFields = function(next){
 
 //build the list of tickets linked by external_id populate data for tooltip
 var buildTicketList = function(objItem) {
-
     var strProjectTag;
 
     strProjectTag = objItem.external_id.replace(/-/i, '_').toLowerCase();
@@ -344,18 +327,16 @@ var buildTicketList = function(objItem) {
     if ( ! _.contains(objItem.tags, strProjectTag) ) { return; }
       var strType = ( objItem.type == null ? '-' : objItem.type );
       var strPriority = ( objItem.priority == null ? '-' : objItem.priority );
-
       var objList = {
         'id': objItem.id,
         'status': objItem.status,
         'statusTitle': objItem.status, // this.I18n.t('status.'+objItem.status)
         'priority': strPriority,
         'type': strType,
-        'assignee_id': assigneeName(objItem.assignee_id),
+        'assignee_id': DATA.arAssignees[objItem.assignee_id] || 'None',
         'group_id': groupName(objItem.group_id),
         'subject': objItem.subject
       };
-
       var hasProjectChildTag = _.include(objItem.tags, 'project_child');
 
       if (hasProjectChildTag) {
@@ -373,6 +354,17 @@ var buildTicketList = function(objItem) {
       }
 
       DATA.arTicketList.push(objList);
+      var objProjects = {
+        projects: DATA.arTicketList,
+        isNextPage: DATA.isNextPage,
+        isPrevPage: DATA.isPrevPage
+      }
+      var d1 = $.Deferred();
+       $('#app').render('project-list', objProjects);
+       d1.resolve('');
+  
+       app.addEventListener('DOMNodeInserted', function(){resizeApp();})
+  
 };
 
 function getTicketFormData(plan) {
@@ -484,21 +476,15 @@ function getGroupsData(intPage) {
 }
 
   function listProjects(objData) {
-    
     DATA.arTicketList = [];
-
-    _.each(objData.users, buildAgentList, this);
-    _.each(objData.groups, buildGroupList, this);
 
     var btnClicked = (objData.type === 'click');
 
     if (!btnClicked) {
       // resets solvable status before building Ticket List
       DATA.isSolvable = true;
-
-      // build ticket list
-      _.each(objData.tickets, buildTicketList, this);
-
+      // list of assignees
+      _.each(objData.results, assigneeName, this);
       if (objData.next_page !== null) {
 
         DATA.next_page = getUrlParameter("page", objData.next_page);
@@ -520,6 +506,8 @@ function getGroupsData(intPage) {
       }
 
     }
+    // // build ticket list
+    // _.each(objData.results, buildTicketList, this);
 
     var objProjects = {
       projects: DATA.arTicketList,
@@ -733,9 +721,7 @@ function getGroupsData(intPage) {
   function getExternalID() {
     client.get('ticket.externalId').then(function(id){
         var exId = id["ticket.externalId"];
-        var thereAreNulls = [undefined, null, ''];
-        var isNotEmpty = (_.indexOf(thereAreNulls, exId) === -1);
-        if (isNotEmpty) {
+        if (notEmpty(exId)) {
           getProjectSearch(exId, 1);
         } else {
           $('#app').render('noproject', {});
@@ -750,7 +736,7 @@ function getGroupsData(intPage) {
 
   function getProjectSearch (intExternalID, intPage, strURL) {
     var objRequest = {
-        url: '/api/v2/tickets.json?external_id=' + intExternalID + '&include=users,groups&per_page=50&lang=' + DATA.currentUser.locale + '&page=' + intPage,
+        url: '/api/v2/search.json?query=type%3Aticket+external_id:' + intExternalID ,
         type:'GET',
         dataType: 'json'
     };
@@ -762,13 +748,20 @@ function getGroupsData(intPage) {
 
   }
 
-  function assigneeName (intAssigneeID) {
-
-    if (intAssigneeID === null) {
-      return 'None';
-    }
-
-    return DATA.arAssignees[intAssigneeID] || 'None';
+  //build a list of assignee names then call the render for the ticket list view
+  function assigneeName (obj) {
+   if (obj.assignee_id === null){ buildTicketList(obj);return;}
+    var objRequest = {
+        url: '/api/v2/users/'+obj.assignee_id+'.json',
+        type:'GET',
+        dataType: 'json'
+    };
+    client.request(objRequest).then(function(objData) {
+      DATA.arAssignees[objData.user.id] = objData.user.name;  
+      buildTicketList(obj);
+    }.bind(this), function(error) {
+      console.error('Could not get ticket form data', error)
+    });
   }
 
   function groupName (intGroupID) {
@@ -850,7 +843,7 @@ function getGroupsData(intPage) {
           objRootTicket.ticket.ticket_form_id = $('#zendeskForm').val();
           objRootTicket.ticket.subject = $('#userSub').val();
 
-          if (!_.isUndefined($('#dueDate').val())) {
+          if (notEmpty($('#dueDate').val())) {
             objRootTicket.ticket.due_at = formatDate($('#dueDate').val());
           }
 
@@ -910,15 +903,9 @@ function getGroupsData(intPage) {
 
   function processData(objData, strType) {
     var intTicketID = DATA.objTicket.id;
-
-    client.metadata().then(function(metadata) {
-      client.set('ticket.customField:custom_field_' + metadata.settings.Custom_Field_ID, 'Project-' + intTicketID);
-
-    });
-    // insuring the external is set and if not setting it
-    var thereAreNulls = [undefined, null, ''];
-    var isNotEmpty = (_.indexOf(thereAreNulls, objData.ticket.external_id) === -1);
-    if (!isNotEmpty) {
+    client.set('ticket.customField:custom_field_' + DATA.Custom_Field_ID, 'Project-' + intTicketID);
+    // insuring the external is set and if not setting it 
+    if (!notEmpty(objData.ticket.external_id)) {
       var objRequest = {
          url: '/api/v2/tickets/' + intTicketID + '.json',
          type:'PUT',
@@ -1195,6 +1182,11 @@ function getGroupsData(intPage) {
   }
   function stayOnSave(data) {
     DATA.stay_on_save = (data['ticket.postSaveAction'] === 'stay_on_ticket') ? true : false;
+  }
+  // check ticket fields for nulls, undfined or empty string
+  function notEmpty(toCheck){
+    var thereAreNulls = [undefined, null, ''];
+    return (_.indexOf(thereAreNulls, toCheck) === -1);
   }
   // EVENTS
  // pull the ticket data again if the parent is updated
