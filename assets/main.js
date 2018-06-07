@@ -1171,7 +1171,7 @@ function getGroupsData(intPage) {
   }
   // EVENTS
  // pull the ticket data again if the parent is updated
-  client.on('ticket.submit.done', function(){
+  client.on('ticket.updated', function(){
     firstData();
   });
 
