@@ -1,4 +1,5 @@
 // global variable
+//from windows
 var DATA = {
   objTicketFormResponse: {},
   objTicketFormData: {},
@@ -87,7 +88,7 @@ var buildTicketFieldList = function (objItem) {
       DATA.arTicketField.push(objItem);
     }
   }
-  DATA.objTicketForms[1] = DATA.arTicketField;
+  //DATA.objTicketForms[1] = DATA.arTicketField;
   //DATA.defaultTicketFormID = 1;
 };
 
@@ -265,17 +266,13 @@ var processTicketFields = function (next) {
     //var intNextPage = next;
     _.each(objData.ticket_fields, buildTicketFieldList, this);
     DATA.arTicketField.forEach(function (objList) {
-      if (DATA.notEnterprise && objList.type === 'tickettype') {
-        arDisplayFields.push(objList);
-      }
-      if (DATA.notEnterprise && objList.type === 'priority') {
-        arDisplayFields.push(objList);
-      }
       if (_.contains(arSelectedForm, objList.id)) {
         arDisplayFields.push(objList);
+      } else if (DATA.notEnterprise) {
+        arDisplayFields.push(objList);
       }
-    });
 
+    });
     $.each(arDisplayFields, function (index, objDisplayFields) {
       DATA.objCurrentTicket.custom_fields.forEach(function (objData) {
         if (objDisplayFields.id == objData.id) {
@@ -303,7 +300,7 @@ var processTicketFields = function (next) {
     });
     if ($('#assigneeName').length === 1) {
       switchToRequester();
-    } else if ($('#zendeskGroup').length === 1) {
+    } else if ($('#zendeskGSelect').length === 1) {
       switchToBulk();
     }
   });
@@ -406,6 +403,7 @@ function getTicketFormData() {
       DATA.objTicketForms[1] = [];
       DATA.objTicketForms[1].name = 'Default';
       DATA.objTicketForms[1].id = 1;
+      DATA.defaultTicketFormID = 1;
       getProjectData();
     }
   });
@@ -633,12 +631,16 @@ function switchToRequester() {
   // $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
   $('#custom-fields-row').render('_fields', DATA.ticketFieldcomp);
   showDate();
+  console.log($('#zendeskGroup'));
+  $("#zendeskGroup").val(DATA.objTicket.group.name);
+      $("#zendeskGSelect").val(DATA.objTicket.group.value);
   $(document).ready(function () {
     if (DATA.notEnterprise) {
       $('#zendeskForm').val(1);
       $('#zendeskForm').parent().hide();
     }
   })
+  
 }
 
 function autocompleteRequesterEmail() {
@@ -1073,6 +1075,7 @@ function putExternalID(objTicketData, intTicketUpdateID, strType) {
 };
 
 function switchToBulk() {
+
   $('#app').render('multicreate', DATA.ticketFieldcomp);
   var fieldRow = document.getElementById('app');
   var observer = new MutationObserver(function (mutations) {
@@ -1087,28 +1090,21 @@ function switchToBulk() {
   };
   observer.observe(fieldRow, config);
 
-  resizeApp();
-
-  $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({
-    dateFormat: 'yy-mm-dd'
-  });
-  $('#custom-fields-row').render('_fields', DATA.ticketFieldcomp);
-  if ($('#zenType').val() === 'task') {
-    $('#dueDate').parent().show();
-  }
-
-
   $('button.displayList').show();
   $('button.displayForm').show();
   $('button.displayMultiCreate').hide();
-  autocompleteRequesterEmail();
+
+  resizeApp();
+
+  $('#custom-fields-row').render('_fields', DATA.ticketFieldcomp);
+  showDate();
+  //autocompleteRequesterEmail();
   $(document).ready(function () {
     if (DATA.notEnterprise) {
       $('#zendeskForm').val(1);
       $('#zendeskForm').parent().hide();
     }
   })
-
 }
 
 function switchToUpdate() {
