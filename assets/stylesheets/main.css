@@ -343,3 +343,21 @@ a {
   color: #337ab7;
   text-decoration: none;
 }
+
+#RequesterPrefillAssignee{
+	float: left;
+    height: 28px;
+    margin-bottom: 3px;
+}
+#RequesterPrefillRequester{
+	font-size: 9px;
+    padding: 1px;
+    height: 28px;
+    line-height: normal;
+    float: right;
+    opacity: .5;
+	transition: opacity .25s ease-in-out;
+}
+#RequesterPrefillRequester:hover{
+	opacity: 1;
+}

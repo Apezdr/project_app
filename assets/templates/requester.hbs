@@ -13,7 +13,9 @@
   </div>
   <div class="control-group">
     <label for="userEmail">{{t "form.requester"}}</label>
-    <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" value="{{email}}"/>
+	<input type="button" value="Use Assignee" id="RequesterPrefillAssignee" />
+	<input type="button" value="Use Requester" id="RequesterPrefillRequester" />
+    <input type="email" required placeholder="me@example.com" name="userEmail" id="userEmail" value="{{requester}}"/>
   </div>
 
   <div class="control-group" style="display: none;">
@@ -42,7 +44,7 @@
 
   <div class="control-group" style="display: none;">
     <label for="dueDate">{{t "form.dueDate"}}</label>
-    <input type="text" required placeholder="Due Date" name="dueDate" id="dueDate" value=""/>
+    <input type="text" placeholder="Due Date" name="dueDate" id="dueDate" value=""/>
   </div>
 
   <div class="control-group">

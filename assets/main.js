@@ -233,7 +233,7 @@ var buildTicketFormList = function (objItem) {
 // process the ticket fields for the render functions
 var processTicketFields = function (next) {
   //need to fix the loop to get all fields
-  var strAssigneeID, strAssigneeName, strGroupName, strGroupID;
+  var strAssigneeID, strAssigneeName, strGroupName, strGroupID, strAssigneeEmail;
   var arDisplayFields = [];
   var strNewSubject = DATA.objTicket.subject;
   var intTicketID = DATA.objTicket.id;
@@ -247,6 +247,7 @@ var processTicketFields = function (next) {
     strAssigneeName = DATA.objTicket.assignee.name;
     strGroupName = DATA.objTicket.group.name;
     strGroupID = DATA.objTicket.group.id;
+    strAssigneeEmail = DATA.objTicket.assignee.email;
   }
   if (DATA.prependSubject) {
     strNewSubject = 'Project-' + intTicketID + ' ' + strNewSubject;
@@ -310,6 +311,7 @@ var processTicketFields = function (next) {
     ticketForm: DATA.objTicketForms,
     currentForm: DATA.currentTicketformID,
     email: DATA.objTicket.requester.email,
+    requester: strAssigneeEmail,
     assigneeName: strAssigneeName,
     assigneeId: strAssigneeID,
     groupName: strGroupName,
@@ -320,7 +322,6 @@ var processTicketFields = function (next) {
     intTicketID: intTicketID,
     fields: arDisplayFields
   };
-
 };
 
 function sortObject(a, b) {
@@ -585,14 +586,42 @@ function showDate() {
   if ($('#zenType').val() === 'task') {
     $('#dueDate').parent().show();
     client.get('ticket.customField:due_date').then(function (dateData) {
-      var currDate = formatDate(dateData['ticket.customField:due_date']);
-      $('#dueDate').val(currDate).datepicker({
-        dateFormat: 'yy-mm-dd'
-      });
+	  var dueDateData = dateData['ticket.customField:due_date'];
+	  if ( dueDateData !== null )
+	  {
+		  var currDate = formatDateYMD(dateData['ticket.customField:due_date']);
+		  $('#dueDate').val(currDate).datepicker({
+			dateFormat: 'yy-mm-dd'
+		  });
+	  }
+	  // console.log('dateData');
+	  // console.log(dateData['ticket.customField:due_date']);
+	  // console.log('currDate');
+	  // console.log(currDate);
     });
   } else {
     $('#dueDate').parent().hide();
   }
+}
+
+function formatDateYMD(date) {
+	var d;
+	if (date == null)
+	{
+		d = new Date();
+	}
+	else{
+		d = new Date(date);
+	}
+	
+	var month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+  var offset = DATA.currentUser.timeZone.formattedOffset.split('GMT')
+  return [year, month, day].join('-');
 }
 
 function formatDate(date) {
@@ -631,7 +660,7 @@ function switchToRequester() {
   // $('#dueDate').val(DATA.objCurrentTicket.due_at).datepicker({ dateFormat: 'yy-mm-dd' });
   $('#custom-fields-row').render('_fields', DATA.ticketFieldcomp);
   showDate();
-  console.log($('#zendeskGroup'));
+  //console.log($('#zendeskGroup'));
   $("#zendeskGroup").val(DATA.objTicket.group.name);
       $("#zendeskGSelect").val(DATA.objTicket.group.value);
   $(document).ready(function () {
@@ -668,10 +697,16 @@ function autocompleteRequesterEmail() {
 
     },
     change: function (event, ui) {
+		console.log('ui');
+		console.log(ui);
       if (_.isNull(ui.item)) {
         $('#userName').parent().show();
         $('#userName').focus();
       }
+	  else{
+		$('#userName').val('');
+		$('#userName').parent().hide();
+	  }
     }
   });
 }
@@ -701,7 +736,7 @@ function autocompleteAssignee() {
 
   // bypass this.form to bind the autocomplete.
   $('#assigneeName').autocomplete({
-    minLength: 3,
+    minLength: 0,
     source: DATA.arAssignable,
     select: function (event, ui) {
       $("#assigneeName").val(ui.item.label);
@@ -922,7 +957,7 @@ function proceedCreateTicketValues(arGroupSelected, intTicketID, arFieldList) {
       objRootTicket.ticket.subject = $('#userSub').val();
 
       if (notEmpty($('#dueDate').val())) {
-        objRootTicket.ticket.due_at = formatDate($('#dueDate').val());
+        objRootTicket.ticket.due_at = formatDateYMD($('#dueDate').val());
       }
 
       objRootTicket.ticket.type = $('#zenType').val();
@@ -1249,6 +1284,25 @@ $(function () {
   $(document).on('click', '.submitSpoke', function () {
     createTicketValues();
   });
+  
+  $(document).on('click', '#RequesterPrefillAssignee', function () {
+	Promise.all([client.get('currentUser'),
+		client.get('ticket'),
+		client.get('ticket.assignee.user')
+	]).then(
+		function fullfilled(contents) {
+		  DATA.objTicket.assignee = contents[2]['ticket.assignee.user'];
+		  $('#userEmail').val(DATA.objTicket.assignee.email);
+		}
+	).catch(function (err) {
+		$('#userEmail').val('');
+		console.log('error', err)
+	});
+  });
+  $(document).on('click', '#RequesterPrefillRequester', function () {
+	  console.log(DATA.ticketFieldcomp.email);
+	$('#userEmail').val(DATA.ticketFieldcomp.email);
+  });
 
   $(document).on('click', '.displayList', function () {
     updateList();
@@ -1295,6 +1349,9 @@ $(function () {
 
   $(document).on('keyup', '#assigneeName', function () {
     autocompleteAssignee();
+  });
+  $(document).on('focus', '#assigneeName', function () {
+	$(this).autocomplete('search', $(this).val());
   });
 
   $(document).on('click', '.displayForm', function () {
