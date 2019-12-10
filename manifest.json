@@ -1,13 +1,14 @@
 {
   "name": "Project App",
   "author": {
-    "name": "Zendesk Labs",
-    "email": "zendesklabs@zendesk.com",
-    "url": "https://www.zendesk.com/customer-experience"
+    "name": "Zendesk Labs & Adam Drumm",
+    "email": "techops@t-insight.com",
+    "url": "https://github.com/Apezdr/project_app"
   },
   "parameters": [{
     "name": "Custom_Field_ID",
     "type": "text",
+	"default": "24575163",
     "required": true
   }, {
     "name": "prependSubject",
@@ -31,6 +32,6 @@
       "ticket_sidebar": "assets/iframe.html"
     }
   },
-  "version": "2.0.8",
+  "version": "1.0.0",
   "frameworkVersion": "2.0"
 }
