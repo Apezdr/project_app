@@ -2,7 +2,7 @@
   <div class="control-group">
     <label for="zendeskForm">{{t "form.ticketForm"}}</label>
     <select id="zendeskForm" required name="zendeskForm"  style="width: auto;" size="1">
-      <option value="">-</option>
+      <!-- <option value="">-</option> -->
       {{#each ticketForm}}
         <option value="{{@key}}" {{#if selected}} selected {{/if}}>{{name}}</option>
       {{/each}}

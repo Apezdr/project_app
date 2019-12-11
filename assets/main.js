@@ -261,7 +261,9 @@ var processTicketFields = function (next) {
   });
 
   var arSelectedForm = DATA.objTicketForms[DATA.currentTicketformID];
-  DATA.objTicketForms[DATA.currentTicketformID].selected = true;
+  
+	DATA.objTicketForms[DATA.currentTicketformID].selected = true;
+  
   client.request(objRequest).then(function (objData) {
     //not sure if needed
     //var intNextPage = next;
@@ -452,7 +454,9 @@ function getProjectData() {
   getGroupsData(1);
   // get the external id
   getExternalID();
-  DATA.currentTicketformID = DATA.objTicket.form.id;
+  //DATA.currentTicketformID = DATA.objTicket.form.id;
+  //Defaults new ticket form
+  DATA.currentTicketformID = 117258;
   projectNameFieldExist();
 }
 
